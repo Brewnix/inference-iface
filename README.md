@@ -24,6 +24,10 @@ examples/
   feature_bundle.example.json
   envelope.example.json
   receipt.example.json
+  notify.operator.example.json
+docs/
+  zero-llm-opnsense-loop.md
+  notify-operator-audit-door.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -58,3 +62,4 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 ## Specs
 
 - [Zero-LLM OPNsense detect → block → receipt loop](docs/zero-llm-opnsense-loop.md) — first executor path (`actor.kind: rule`)
+- [notify.operator ↔ shared auditor door](docs/notify-operator-audit-door.md) — plane auditor API; required on `hold_human` / high `propose`

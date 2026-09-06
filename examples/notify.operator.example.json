@@ -1,0 +1,47 @@
+{
+  "schema": "fyber.inference_iface/v0",
+  "trace_id": "550e8400-e29b-41d4-a716-446655440020",
+  "site_id": "net-tn-cottage",
+  "actor": {
+    "kind": "rule",
+    "id": "brewnix-rules/v0.1",
+    "purpose": "triage"
+  },
+  "observed_at": "2026-09-06T21:05:00Z",
+  "inputs_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "judgment": {
+    "severity": "high",
+    "classes": ["brute_force"],
+    "subjects": [{ "kind": "ip", "value": "203.0.113.50" }],
+    "summary": "SSH auth-fail burst from 203.0.113.50; hold for operator",
+    "evidence_refs": ["eve:cluster-2"]
+  },
+  "proposals": [
+    {
+      "call_id": "550e8400-e29b-41d4-a716-446655440021",
+      "tool": "firewall.block_ip",
+      "mode": "propose",
+      "ttl_s": 86400,
+      "reason_code": "ssh_brute",
+      "args": {
+        "ip": "203.0.113.50",
+        "alias": "ai_autoblock",
+        "direction": "wan_in",
+        "ttl_s": 86400
+      }
+    },
+    {
+      "call_id": "550e8400-e29b-41d4-a716-446655440022",
+      "tool": "notify.operator",
+      "mode": "execute",
+      "reason_code": "propose_needs_ack",
+      "args": {
+        "channel": "fyber.auditor",
+        "severity": "high",
+        "text_redacted": "propose_needs_ack site=net-tn-cottage receipt_id=550e8400-e29b-41d4-a716-446655440030 ip=203.0.113.50 rule=ssh_brute"
+      }
+    }
+  ],
+  "confidence": 0.9,
+  "needs_human": true
+}
