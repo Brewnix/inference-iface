@@ -54,3 +54,7 @@ Pre-provision OPNsense alias + block rule; mutate alias membership only. No `she
 ## Non-goals (v0)
 
 Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes · raw Suricata EVE as model context.
+
+## Specs
+
+- [Zero-LLM OPNsense detect → block → receipt loop](docs/zero-llm-opnsense-loop.md) — first executor path (`actor.kind: rule`)
