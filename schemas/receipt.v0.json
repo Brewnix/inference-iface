@@ -184,18 +184,18 @@
       "required": ["required", "resolved_by", "resolved_at", "resolution"],
       "properties": {
         "required": { "type": "boolean" },
+        "resolved_by": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "maxLength": 128 }
+          ]
+        },
         "resolved_at": {
           "oneOf": [
             { "type": "null" },
             {
               "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Rfc3339"
             }
-          ]
-        },
-        "resolved_by": {
-          "oneOf": [
-            { "type": "null" },
-            { "type": "string", "maxLength": 128 }
           ]
         },
         "resolution": {
