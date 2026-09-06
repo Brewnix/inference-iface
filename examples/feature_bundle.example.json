@@ -1,0 +1,24 @@
+{
+  "window_s": 300,
+  "counts": {
+    "alert_total": 42,
+    "by_sid": { "2100498": 12 },
+    "by_src": { "203.0.113.50": 30 }
+  },
+  "top_subjects": [
+    {
+      "ip": "203.0.113.50",
+      "hits": 30,
+      "ports": [22, 23],
+      "sids": ["2100498"]
+    }
+  ],
+  "health": {
+    "cpu": 0.4,
+    "disk": 0.55,
+    "wan_gateways": ["up"],
+    "suricata": "running"
+  },
+  "whitelist_hits": 0,
+  "prior_blocks": []
+}

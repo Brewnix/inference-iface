@@ -1,0 +1,80 @@
+{
+  "schema": "fyber.receipt/v0",
+  "receipt_id": "550e8400-e29b-41d4-a716-446655440010",
+  "parent_id": null,
+  "site_id": "net-tn-cottage",
+  "trace_id": "550e8400-e29b-41d4-a716-446655440000",
+  "ts": "2026-09-06T21:00:01Z",
+  "door": "site_defense",
+  "purpose": "contain",
+  "posture": {
+    "wan_up": true,
+    "plane_reachable": false,
+    "path_b": "n/a",
+    "sell_state": "off"
+  },
+  "input": {
+    "sources": ["suricata", "opnsense"],
+    "features_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "window_s": 300
+  },
+  "judgment": {
+    "severity": "critical",
+    "classes": ["port_scan"],
+    "subjects": [{ "kind": "ip", "value": "203.0.113.50" }],
+    "summary": "Burst port scan from 203.0.113.50 on 22/23",
+    "evidence_refs": ["eve:cluster-1"]
+  },
+  "actor": {
+    "kind": "model",
+    "id": "qwen2.5-7b-q4@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "purpose": "triage"
+  },
+  "proposals": [
+    {
+      "call_id": "550e8400-e29b-41d4-a716-446655440001",
+      "tool": "firewall.block_ip",
+      "mode": "execute",
+      "ttl_s": 86400,
+      "reason_code": "port_scan_burst",
+      "args": {
+        "ip": "203.0.113.50",
+        "alias": "ai_autoblock",
+        "direction": "wan_in",
+        "ttl_s": 86400
+      }
+    }
+  ],
+  "policy": {
+    "engine": "brewnix-policy/v0",
+    "decision": "execute",
+    "rule_ids": ["crit_auto_block_wan"]
+  },
+  "execution": [
+    {
+      "call_id": "550e8400-e29b-41d4-a716-446655440001",
+      "tool": "firewall.block_ip",
+      "status": "applied",
+      "executor": "opnsense-api@site",
+      "started_at": "2026-09-06T21:00:01Z",
+      "finished_at": "2026-09-06T21:00:01Z",
+      "effect": {
+        "alias": "ai_autoblock",
+        "ip": "203.0.113.50",
+        "ttl_s": 86400
+      },
+      "error": null
+    }
+  ],
+  "human": {
+    "required": false,
+    "resolved_by": null,
+    "resolved_at": null,
+    "resolution": null
+  },
+  "integrity": {
+    "body_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "prev_hash": null,
+    "sig": null
+  }
+}
