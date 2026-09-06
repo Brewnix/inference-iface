@@ -78,9 +78,11 @@ On each envelope:
 1. Reject unknown tools / bad args (JSON Schema).
 2. If IP in static whitelist → `observe`.
 3. If IP already in `ai_autoblock` with remaining TTL → `observe` (dedupe).
-4. Rate limit: max **B** new blocks / hour / site (default B = 30) → else `hold_human` (+ optional `notify.operator`).
+4. Rate limit: max **B** new blocks / hour / site (default B = 30) → else `hold_human` (**requires** `notify.operator`).
 5. Else if `severity` is `critical` and rule id ∈ auto set (`port_scan_burst`, …) → `execute`.
-6. Else if `severity` is `high` → **`propose` only** in v0.1 (notify; no auto block). Critical-only auto keeps false positives recoverable.
+6. Else if `severity` is `high` → **`propose` only** in v0.1 (**requires** `notify.operator`; no auto block). Critical-only auto keeps false positives recoverable.
+
+Notify door (channel `fyber.auditor`, queue-if-offline, human resolution): [notify.operator ↔ shared auditor door](notify-operator-audit-door.md).
 
 Record `policy.rule_ids` as the matching detector ids (e.g. `["port_scan_burst"]`).  
 `policy.engine` = `brewnix-policy/v0`.
