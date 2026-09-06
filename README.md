@@ -1,2 +1,56 @@
-# inference-iface
-Locked fyber.inference_iface/v0 + fyber.receipt/v0 JSON Schemas (site defense sense→decide→act→receipt). LLM judges; typed actuators execute.
+# Fyber inference interface + receipt — v0 (LOCKED)
+
+Working contract locked **2026-09-06** by Chris:
+
+- `fyber.inference_iface/v0` — judgment + typed tool **proposals** only
+- `fyber.receipt/v0` — digests, policy decision, execution effects, hash chain
+- LLM **never** mutates firewall/host state; policy engine + APIs/scripts execute
+- No prompts, packet payloads, or renter chat in receipts
+- Offline-first: same JSON with Panopticon unreachable
+
+Breaking changes require an explicit **v1** or Chris-approved amendment. Additive optional fields may ship behind a flag without bumping the `schema` const.
+
+## Layout
+
+```
+README.md
+LOCK.md
+schemas/
+  common.v0.json           # $defs: Actor, Judgment, ToolCall, …
+  feature_bundle.v0.json   # redacted model inputs
+  inference_iface.v0.json  # envelope
+  receipt.v0.json          # receipt
+examples/
+  feature_bundle.example.json
+  envelope.example.json
+  receipt.example.json
+```
+
+Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
+
+## `$id` URIs
+
+| File | `$id` |
+|------|-------|
+| common | `https://fyberlabs.com/schemas/fyber.common/v0` |
+| feature bundle | `https://fyberlabs.com/schemas/fyber.feature_bundle/v0` |
+| envelope | `https://fyberlabs.com/schemas/fyber.inference_iface/v0` |
+| receipt | `https://fyberlabs.com/schemas/fyber.receipt/v0` |
+
+Cross-refs use those `$id`s. For local validation, configure your schema loader to map each `$id` to the sibling file under `schemas/` (do not require network fetch).
+
+## Tool catalog (v0 allowlist)
+
+`firewall.block_ip` · `firewall.unblock_ip` · `net.quarantine_host` · `ids.suricata_pass` · `health.restart_service` · `health.set_nvpmodel` · `hypermesh.lease_stop` · `hypermesh.sell_pause` · `notify.operator` · `receipt.annotate`
+
+Pre-provision OPNsense alias + block rule; mutate alias membership only. No `shell.exec`.
+
+## Validation notes
+
+1. Subjects in `judgment` / tool args that refer to IPs should appear in the feature bundle when the actor is `model` (enforced by policy, not only JSON Schema).
+2. `integrity.body_hash`: hash canonical JSON of the receipt with `integrity` omitted (or with `body_hash`/`sig` set null — pick one algorithm and stick to it in the executor).
+3. `inputs_digest` / `features_digest`: SHA-256 of canonical feature-bundle JSON, encoded `sha256:` + 64 hex chars.
+
+## Non-goals (v0)
+
+Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes · raw Suricata EVE as model context.
