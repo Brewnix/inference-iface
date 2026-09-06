@@ -1,1 +1,240 @@
-PLACEHOLDER_RECEIPT
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fyberlabs.com/schemas/fyber.receipt/v0",
+  "title": "Fyber site defense / IR receipt v0",
+  "description": "Immutable decision+execution receipt. Digests and effects only — no prompts, payloads, or renter chat. LOCKED 2026-09-06.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receipt_id",
+    "site_id",
+    "trace_id",
+    "ts",
+    "door",
+    "purpose",
+    "posture",
+    "input",
+    "judgment",
+    "actor",
+    "proposals",
+    "policy",
+    "execution",
+    "human",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "fyber.receipt/v0"
+    },
+    "receipt_id": {
+      "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Uuid"
+    },
+    "parent_id": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Uuid" }
+      ]
+    },
+    "site_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "trace_id": {
+      "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Uuid"
+    },
+    "ts": {
+      "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Rfc3339"
+    },
+    "door": {
+      "type": "string",
+      "enum": ["site_defense", "ir", "renter", "ops"]
+    },
+    "purpose": {
+      "type": "string",
+      "enum": ["contain", "triage", "health", "ir_review"]
+    },
+    "posture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wan_up", "plane_reachable", "path_b", "sell_state"],
+      "properties": {
+        "wan_up": { "type": "boolean" },
+        "plane_reachable": { "type": "boolean" },
+        "path_b": { "type": "string", "enum": ["green", "red", "n/a"] },
+        "sell_state": {
+          "type": "string",
+          "enum": ["off", "on", "paused", "n/a"]
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "features_digest", "window_s"],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["suricata", "opnsense", "proxmox", "hypermesh_host"]
+          },
+          "uniqueItems": true
+        },
+        "features_digest": {
+          "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Sha256Digest"
+        },
+        "window_s": { "type": "integer", "minimum": 1, "maximum": 86400 }
+      }
+    },
+    "judgment": {
+      "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/SeverityJudgment"
+    },
+    "actor": {
+      "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Actor"
+    },
+    "proposals": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/ToolCall"
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "decision", "rule_ids"],
+      "properties": {
+        "engine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["observe", "propose", "execute", "hold_human"]
+        },
+        "rule_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "call_id",
+          "tool",
+          "status",
+          "executor",
+          "started_at",
+          "finished_at",
+          "effect",
+          "error"
+        ],
+        "properties": {
+          "call_id": {
+            "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Uuid"
+          },
+          "tool": {
+            "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/ToolName"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["applied", "denied", "dry_run", "failed", "expired"]
+          },
+          "executor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "started_at": {
+            "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Rfc3339"
+          },
+          "finished_at": {
+            "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Rfc3339"
+          },
+          "effect": {
+            "type": "object",
+            "description": "Tool-specific effect snapshot; keep small and non-secret."
+          },
+          "error": {
+            "oneOf": [
+              { "type": "null" },
+              { "type": "string", "maxLength": 500 }
+            ]
+          }
+        }
+      }
+    },
+    "human": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "resolved_by", "resolved_at", "resolution"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "resolved_at": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Rfc3339"
+            }
+          ]
+        },
+        "resolved_by": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "maxLength": 128 }
+          ]
+        },
+        "resolution": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "enum": ["approved", "denied", "timed_out", "amended"]
+            }
+          ]
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body_hash", "prev_hash", "sig"],
+      "properties": {
+        "body_hash": {
+          "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Sha256Digest",
+          "description": "SHA-256 of canonical receipt JSON with integrity omitted (or integrity.sig/body_hash cleared per impl note)."
+        },
+        "prev_hash": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "$ref": "https://fyberlabs.com/schemas/fyber.common/v0#/$defs/Sha256Digest"
+            }
+          ],
+          "description": "Prior receipt body_hash on this site chain; null for genesis."
+        },
+        "sig": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "maxLength": 4096 }
+          ],
+          "description": "Optional device/SociACL signature; null in v0 ok."
+        }
+      }
+    }
+  }
+}
