@@ -1,1 +1,334 @@
-PLACEHOLDER_COMMON
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fyberlabs.com/schemas/fyber.common/v0",
+  "title": "Fyber inference-ops common types v0",
+  "description": "Shared definitions for fyber.inference_iface/v0 and fyber.receipt/v0. LOCKED 2026-09-06.",
+  "$defs": {
+    "Sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Lowercase hex SHA-256 with sha256: prefix."
+    },
+    "Uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "Rfc3339": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Severity": {
+      "type": "string",
+      "enum": ["info", "low", "medium", "high", "critical"]
+    },
+    "ThreatClass": {
+      "type": "string",
+      "enum": [
+        "port_scan",
+        "brute_force",
+        "c2_beacon",
+        "malware",
+        "misconfig",
+        "health",
+        "unknown"
+      ]
+    },
+    "SubjectKind": {
+      "type": "string",
+      "enum": ["ip", "host", "user", "lease", "iface"]
+    },
+    "Subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/SubjectKind" },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "ActorKind": {
+      "type": "string",
+      "enum": ["model", "rule", "human"]
+    },
+    "ActorPurpose": {
+      "type": "string",
+      "enum": ["triage", "plan", "ir_analyst"]
+    },
+    "Actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "purpose"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/ActorKind" },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Stable id, e.g. model name@digest, rulepack version, or human id."
+        },
+        "purpose": { "$ref": "#/$defs/ActorPurpose" }
+      }
+    },
+    "SeverityJudgment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "classes", "subjects", "summary", "evidence_refs"],
+      "properties": {
+        "severity": { "$ref": "#/$defs/Severity" },
+        "classes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ThreatClass" },
+          "uniqueItems": true
+        },
+        "subjects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Subject" }
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Opaque refs such as eve:…, log:…, metric:…"
+          }
+        }
+      }
+    },
+    "ToolName": {
+      "type": "string",
+      "enum": [
+        "firewall.block_ip",
+        "firewall.unblock_ip",
+        "net.quarantine_host",
+        "ids.suricata_pass",
+        "health.restart_service",
+        "health.set_nvpmodel",
+        "hypermesh.lease_stop",
+        "hypermesh.sell_pause",
+        "notify.operator",
+        "receipt.annotate"
+      ]
+    },
+    "ToolMode": {
+      "type": "string",
+      "enum": ["dry_run", "propose", "execute"]
+    },
+    "ToolCallBase": {
+      "type": "object",
+      "required": ["call_id", "tool", "args", "mode", "reason_code"],
+      "properties": {
+        "call_id": { "$ref": "#/$defs/Uuid" },
+        "tool": { "$ref": "#/$defs/ToolName" },
+        "mode": { "$ref": "#/$defs/ToolMode" },
+        "ttl_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800,
+          "description": "Optional TTL for effects that expire (e.g. blocks)."
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        }
+      }
+    },
+    "ArgsFirewallBlockIp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ip"],
+      "properties": {
+        "ip": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "alias": { "type": "string", "default": "ai_autoblock", "maxLength": 64 },
+        "direction": {
+          "type": "string",
+          "enum": ["wan_in", "lan_in", "any"],
+          "default": "wan_in"
+        },
+        "ttl_s": { "type": "integer", "minimum": 1, "maximum": 604800 }
+      }
+    },
+    "ArgsFirewallUnblockIp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ip"],
+      "properties": {
+        "ip": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "alias": { "type": "string", "default": "ai_autoblock", "maxLength": 64 }
+      }
+    },
+    "ArgsNetQuarantineHost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isolation_net"],
+      "properties": {
+        "mac": { "type": "string", "maxLength": 32 },
+        "ip": { "type": "string", "maxLength": 64 },
+        "isolation_net": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "vlan": { "type": "integer", "minimum": 1, "maximum": 4094 }
+      },
+      "anyOf": [
+        { "required": ["mac"] },
+        { "required": ["ip"] }
+      ]
+    },
+    "ArgsIdsSuricataPass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sid", "state"],
+      "properties": {
+        "sid": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "state": { "type": "string", "enum": ["enable", "disable"] }
+      }
+    },
+    "ArgsHealthRestartService": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "unit"],
+      "properties": {
+        "node": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "unit": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "ArgsHealthSetNvpmodel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "profile"],
+      "properties": {
+        "device_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "profile": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "ArgsHypermeshLeaseStop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lease_id", "reason_code"],
+      "properties": {
+        "lease_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        }
+      }
+    },
+    "ArgsHypermeshSellPause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id"],
+      "properties": {
+        "device_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "until": { "$ref": "#/$defs/Rfc3339" }
+      }
+    },
+    "ArgsNotifyOperator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "severity", "text_redacted"],
+      "properties": {
+        "channel": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "severity": { "$ref": "#/$defs/Severity" },
+        "text_redacted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "No secrets, payloads, or prompts."
+        }
+      }
+    },
+    "ArgsReceiptAnnotate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "text"],
+      "properties": {
+        "receipt_id": { "$ref": "#/$defs/Uuid" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      }
+    },
+    "ToolCall": {
+      "description": "Allowlisted tool call. LLM may propose; policy+executor only may execute.",
+      "allOf": [
+        { "$ref": "#/$defs/ToolCallBase" },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "tool": { "const": "firewall.block_ip" },
+                "args": { "$ref": "#/$defs/ArgsFirewallBlockIp" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "firewall.unblock_ip" },
+                "args": { "$ref": "#/$defs/ArgsFirewallUnblockIp" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "net.quarantine_host" },
+                "args": { "$ref": "#/$defs/ArgsNetQuarantineHost" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "ids.suricata_pass" },
+                "args": { "$ref": "#/$defs/ArgsIdsSuricataPass" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "health.restart_service" },
+                "args": { "$ref": "#/$defs/ArgsHealthRestartService" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "health.set_nvpmodel" },
+                "args": { "$ref": "#/$defs/ArgsHealthSetNvpmodel" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "hypermesh.lease_stop" },
+                "args": { "$ref": "#/$defs/ArgsHypermeshLeaseStop" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "hypermesh.sell_pause" },
+                "args": { "$ref": "#/$defs/ArgsHypermeshSellPause" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "notify.operator" },
+                "args": { "$ref": "#/$defs/ArgsNotifyOperator" }
+              }
+            },
+            {
+              "properties": {
+                "tool": { "const": "receipt.annotate" },
+                "args": { "$ref": "#/$defs/ArgsReceiptAnnotate" }
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}
