@@ -1,1 +1,86 @@
-PLACEHOLDER_FEATURE
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fyberlabs.com/schemas/fyber.feature_bundle/v0",
+  "title": "Fyber redacted feature bundle v0",
+  "description": "What a model/rules engine may see. No raw EVE dumps, packets, or prompts. LOCKED 2026-09-06.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["window_s", "counts", "top_subjects", "health", "whitelist_hits", "prior_blocks"],
+  "properties": {
+    "window_s": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alert_total", "by_sid", "by_src"],
+      "properties": {
+        "alert_total": { "type": "integer", "minimum": 0 },
+        "by_sid": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "by_src": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "top_subjects": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ip", "hits"],
+        "properties": {
+          "ip": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "hits": { "type": "integer", "minimum": 1 },
+          "ports": {
+            "type": "array",
+            "maxItems": 64,
+            "items": { "type": "integer", "minimum": 0, "maximum": 65535 }
+          },
+          "sids": {
+            "type": "array",
+            "maxItems": 64,
+            "items": { "type": "string", "maxLength": 32 }
+          }
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpu", "disk", "wan_gateways", "suricata"],
+      "properties": {
+        "cpu": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "wan_gateways": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["up", "down", "warn"] }
+        },
+        "suricata": {
+          "type": "string",
+          "enum": ["running", "stopped", "unknown"]
+        }
+      }
+    },
+    "whitelist_hits": { "type": "integer", "minimum": 0 },
+    "prior_blocks": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ip", "remaining_ttl_s"],
+        "properties": {
+          "ip": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "remaining_ttl_s": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}
