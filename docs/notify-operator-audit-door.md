@@ -2,11 +2,11 @@
 
 **Status:** working spec (2026-09-06)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
-**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (plane ticket: `fyber.auditor.ticket/v0`)
+**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (plane ticket: `fyber.auditor.ticket/v0`) · [fyber.privilege_grant v0](privilege-grant-v0.md) (incident elevation; grant ≠ this ticket)
 
 Goal: when policy cannot auto-execute (rate-limit hold, non-auto propose) or after an action needs review, the site posts a **typed** `notify.operator` to a **shared auditor API** in the Hypermesh / Panopticon plane. The site still writes a local `fyber.receipt/v0` first. The plane is a door, not a prerequisite.
 
-Plane half (create / get / resolve / ack): [fyber.auditor API v0](fyber-auditor-api-v0.md). `notify.operator` is the site actuator that POSTs `fyber.auditor.ticket/v0`. The ticket is inbox + resolution **intent** until the site acks with an apply / observe receipt.
+Plane half (create / get / resolve / ack): [fyber.auditor API v0](fyber-auditor-api-v0.md). `notify.operator` is the site actuator that POSTs `fyber.auditor.ticket/v0`. The ticket is inbox + resolution **intent** until the site acks with an apply / observe receipt. One-shot held-tool approve stays on that ticket. A ticket **may** approve a [`fyber.privilege_grant/v0`](privilege-grant-v0.md) (`reason_code: break_glass` when minting break-glass); the grant is a time-bounded policy elevation, not a substitute ticket.
 
 ## Goal / non-goals
 
@@ -33,7 +33,7 @@ From `schemas/common.v0.json` → `$defs/ArgsNotifyOperator` + `ToolCall`. Do no
 | `call_id` | yes | UUID |
 | `tool` | yes | `notify.operator` |
 | `mode` | yes | `dry_run` \| `propose` \| `execute` — policy **executes** notify on hold / ack paths even when the companion firewall tool stays `propose` |
-| `reason_code` | yes | `^[a-z][a-z0-9_]{0,63}$` (e.g. `rate_limit_hold`, `propose_needs_ack`, `post_action_audit`) |
+| `reason_code` | yes | `^[a-z][a-z0-9_]{0,63}$` (e.g. `rate_limit_hold`, `propose_needs_ack`, `post_action_audit`, `break_glass` when the ticket may mint a [grant](privilege-grant-v0.md)) |
 | `ttl_s` | no | unused for notify in v0 |
 | `args.channel` | yes | string 1–64; policy allowlist includes **`fyber.auditor`** |
 | `args.severity` | yes | `info` \| `low` \| `medium` \| `high` \| `critical` |
