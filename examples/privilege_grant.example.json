@@ -1,0 +1,94 @@
+{
+  "proposed": {
+    "schema": "fyber.privilege_grant/v0",
+    "grant_id": "550e8400-e29b-41d4-a716-446655440080",
+    "site_id": "net-tn-cottage",
+    "incident_id": "550e8400-e29b-41d4-a716-446655440081",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440070",
+    "requested_at": "2026-09-07T15:00:00Z",
+    "requested_by": { "kind": "automation", "id": "brewnix-policy/v0" },
+    "reason_redacted": "health_suricata_down site=net-tn-cottage incident needs ir_elevated restart + local_large budget",
+    "asks": [
+      {
+        "kind": "tool_allowlist_add",
+        "tools": ["health.restart_service", "notify.operator"]
+      },
+      {
+        "kind": "rate_limit_raise",
+        "metric": "blocks_per_hour",
+        "limit": 12
+      },
+      {
+        "kind": "model_tier",
+        "tier": "local_large"
+      },
+      {
+        "kind": "budget_tokens",
+        "max_tokens": 32000
+      },
+      {
+        "kind": "prompt_route",
+        "template_ids": ["ir.triage.v0"]
+      }
+    ],
+    "rails_profile_requested": "ir_elevated",
+    "ttl_s_requested": 14400,
+    "blast_radius": "site",
+    "status": "proposed",
+    "resolution": null,
+    "active_until": null,
+    "parent_grant_id": null,
+    "ticket_id": "550e8400-e29b-41d4-a716-446655440082",
+    "integrity": null
+  },
+  "approved_break_glass": {
+    "schema": "fyber.privilege_grant/v0",
+    "grant_id": "550e8400-e29b-41d4-a716-446655440090",
+    "site_id": "net-tn-cottage",
+    "incident_id": "550e8400-e29b-41d4-a716-446655440081",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440070",
+    "requested_at": "2026-09-07T16:00:00Z",
+    "requested_by": { "kind": "human", "id": "panopticon:user:chris" },
+    "reason_redacted": "break_glass site=net-tn-cottage suricata down + wan warn; need plane_ir route and emergency pack",
+    "asks": [
+      {
+        "kind": "tool_allowlist_add",
+        "tools": ["health.restart_service", "notify.operator", "ids.suricata_pass", "packs/emergency-v0"]
+      },
+      {
+        "kind": "rate_limit_raise",
+        "metric": "blocks_per_hour",
+        "limit": 24
+      },
+      {
+        "kind": "model_tier",
+        "tier": "plane_ir"
+      },
+      {
+        "kind": "budget_tokens",
+        "max_tokens": 64000
+      },
+      {
+        "kind": "prompt_route",
+        "template_ids": ["ir.triage.v0", "emergency.contain.v0"]
+      }
+    ],
+    "rails_profile_requested": "break_glass",
+    "ttl_s_requested": 1800,
+    "blast_radius": "site",
+    "status": "approved",
+    "resolution": {
+      "resolved_by": "panopticon:user:chris",
+      "resolved_at": "2026-09-07T16:02:00Z",
+      "ttl_s": 1800,
+      "rails_profile": "break_glass",
+      "notes_redacted": "home owner mint; ticket reason_code=break_glass; clamp 30m; Phase B cooldown before next break_glass"
+    },
+    "active_until": "2026-09-07T16:32:00Z",
+    "parent_grant_id": "550e8400-e29b-41d4-a716-446655440080",
+    "ticket_id": "550e8400-e29b-41d4-a716-446655440091",
+    "integrity": {
+      "body_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  }
+}

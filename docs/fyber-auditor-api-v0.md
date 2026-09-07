@@ -3,9 +3,9 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Plane contract:** `fyber.auditor.ticket/v0` (HTTP; **not** a file under `schemas/`)  
-**Companion:** [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md)
+**Companion:** [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.privilege_grant v0](privilege-grant-v0.md) (incident elevation; **not** this ticket) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md)
 
-Goal: a **shared prompt-router / auditor API** on the Hypermesh / Panopticon plane. Sites already write a local `fyber.receipt/v0` and POST a typed `notify.operator`. This doc is the plane door those POSTs hit. The plane is a human inbox + resolution **intent**. Actuation truth stays on the site receipt.
+Goal: a **shared prompt-router / auditor API** on the Hypermesh / Panopticon plane. Sites already write a local `fyber.receipt/v0` and POST a typed `notify.operator`. This doc is the plane door those POSTs hit. The plane is a human inbox + resolution **intent**. Actuation truth stays on the site receipt. A ticket may **approve a grant**; a grant is **not** a one-shot held-tool approve — that stays on this door (`asks: []` is a ticket, not `fyber.privilege_grant/v0`).
 
 **Home:** this repo holds the contract. **Panopticon** (or a dedicated service it fronts) implements. Not hyperme.sh the marketing site. Site JSON Schemas stay locked; do not add ticket fields to `schemas/`.
 
@@ -98,7 +98,7 @@ Body (`fyber.auditor.ticket/v0`):
 | `trace_id` | yes | UUID (envelope / receipt cycle) |
 | `receipt_id` | yes | UUID of the **held** site receipt, or `null` if not yet known |
 | `held_call_id` | yes | UUID of the **companion** tool call (not the `notify.operator` `call_id`) |
-| `reason_code` | yes | `^[a-z][a-z0-9_]{0,63}$` — e.g. `rate_limit_hold`, `propose_needs_ack`, `post_action_audit` |
+| `reason_code` | yes | `^[a-z][a-z0-9_]{0,63}$` — e.g. `rate_limit_hold`, `propose_needs_ack`, `post_action_audit`, `break_glass` (ticket that may mint a [grant](privilege-grant-v0.md); not a one-shot substitute) |
 | `severity` | yes | `info` \| `low` \| `medium` \| `high` \| `critical` (same enum as site schemas) |
 | `text_redacted` | yes | 1–1000 chars; **no** secrets, payloads, or prompts |
 | `display.tool` | yes | one allowlisted companion tool (v0 loop: `firewall.block_ip` / `firewall.unblock_ip`) |

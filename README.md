@@ -28,12 +28,14 @@ examples/
   auditor.ticket.example.json
   expiry.unblock.example.json
   health.watch.example.json
+  privilege_grant.example.json
 docs/
   zero-llm-opnsense-loop.md
   expiry-unblock-loop.md
   health-watch-v0.md
   notify-operator-audit-door.md
   fyber-auditor-api-v0.md
+  privilege-grant-v0.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -72,3 +74,4 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 - [Health-watch v0.1](docs/health-watch-v0.md) — sibling non-IDS pack from `feature_bundle.health` (propose + notify; no auto-execute)
 - [notify.operator ↔ shared auditor door](docs/notify-operator-audit-door.md) — site half of the plane auditor door; required on `hold_human` / high `propose`
 - [fyber.auditor API v0](docs/fyber-auditor-api-v0.md) — locked plane ticket contract (`fyber.auditor.ticket/v0`); Panopticon implements
+- [fyber.privilege_grant v0](docs/privilege-grant-v0.md) — locked plane/site grant (`fyber.privilege_grant/v0`); automations propose, human mints; **not** a one-shot ticket
