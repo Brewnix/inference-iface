@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Plane contract:** `fyber.privilege_grant/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half)
+**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT)
 
 Goal: a **bounded, expiring policy elevation** for one `(site_id, incident_id)`. Automations **propose**. A human (or dual-control) **mints**. The site hot-reloads allowlists / budgets / `rails_profile` for that incident only. Executions stay on `fyber.inference_iface/v0` + the typed executor. The LLM never executes.
 
@@ -24,7 +24,7 @@ A grant is **not** a one-shot held-tool approve. That stays on `fyber.auditor.ti
 | Non-goal | Why |
 |----------|-----|
 | JSON Schema under `schemas/` | Separate lock. Implement against this file. |
-| `incident_id` binding document | Field is required on the grant; the incident object / store is out of band. |
+| Incident store / join algorithm | Grant **requires** `incident_id`. Open / join / close is [incident-binding-v0](incident-binding-v0.md) — not this file. |
 | SociACL Check grants | Different plane. README non-goal unchanged. |
 | Enterprise compliance pack | Dual-control is a ladder rule, not a SOC2/ISO artifact in this repo. |
 | Expanding `ToolName` casually | Grant tools ⊆ the locked enum and/or a named pack. New tools are a schema amendment. |
@@ -33,7 +33,7 @@ A grant is **not** a one-shot held-tool approve. That stays on `fyber.auditor.ti
 ## Axioms
 
 1. **Automations propose; human (or dual-control) mints.** The LLM never executes and is never `resolved_by`.
-2. **Grant changes policy for one incident.** Allowlists / budgets / `rails_profile` apply only to `(site_id, incident_id)`. Expiry is mandatory.
+2. **Grant changes policy for one incident.** Allowlists / budgets / `rails_profile` apply only to `(site_id, incident_id)`. `incident_id` is required ([binding](incident-binding-v0.md)). Expiry is mandatory.
 3. **Break-glass is not a bypass.** Same five ask kinds, shorter TTL, louder audit, wider max catalog. Not `shell_unrestricted`. Not “skip receipts”.
 4. **One-shot held-tool approve stays on the ticket.** `asks: []` is invalid — refuse the grant and use `fyber.auditor.ticket/v0`.
 5. **Profiles compose asks.** A set profile is the ceiling. Asks are optional deltas ⊆ that catalog. `rails_profile_requested` null → treat asks as deltas on **strict**.
@@ -74,7 +74,7 @@ Unknown `kind` → reject the grant. Extra keys on an ask fail validation. CUT k
 - **Profile set** → `asks` are optional deltas ⊆ that profile’s max catalog. Still **non-empty** (axiom 4).
 - **Profile null** → treat as **strict + named deltas**. Each ask must be a valid v0 kind and must fit the **strict** ceiling (baseline). Anything that needs `ir_elevated` / `break_glass` must name that profile.
 - **Approve may drop asks** (amend down). Approve **must not** add asks, widen tools/templates, raise TTL, or lift `rails_profile` past what was requested.
-- **`break_glass` forces** TTL clamp to the profile max (prefer 30m), an auditor ticket with `reason_code: break_glass`, `resolution.notes_redacted` on approve, and a **Phase B cooldown** before the next `break_glass` on that site (same idea as the notify door’s post-action cycle — not a second grant kind).
+- **`break_glass` forces** TTL clamp to the profile max (prefer 30m), an auditor ticket with `reason_code: break_glass`, `resolution.notes_redacted` on approve, and a **Phase B cooldown** before the next `break_glass` on that site. Cooldown keys off `closed_at` of the [incident](incident-binding-v0.md) that held the grant (same idea as the notify door’s post-action cycle — not a second grant kind).
 - **`net.quarantine_host` / `hypermesh.lease_stop` are not implied** by any profile. Add them only via explicit `tool_allowlist_add` when those actuators are ready — and only if the active profile max catalog includes them (today: not in `ir_elevated` defaults; only if listed in `packs/emergency-v0`).
 - **Single grant TTL.** No per-ask TTL. `ttl_s` on resolve is the one clock.
 - **`blast_radius` is `site` only** in v0.
@@ -118,7 +118,7 @@ Docs-first resource. Extra keys fail validation. Shape reference: `examples/priv
 | `schema` | yes | const `fyber.privilege_grant/v0` |
 | `grant_id` | yes (once minted / stored) | UUID. Assigned on propose (store). |
 | `site_id` | yes | Same site scope as auditor tokens / envelopes. |
-| `incident_id` | yes | UUID. Binds the elevation. Incident object is out of band (non-goal). |
+| `incident_id` | yes | UUID. Binds the elevation. Must exist or be opened per [incident binding](incident-binding-v0.md). Missing / empty → reject. |
 | `trace_id` | yes | UUID (envelope / receipt cycle that proposed). |
 | `requested_at` | yes | RFC3339 |
 | `requested_by` | yes | `{ "kind", "id" }`. `kind`: `automation` \| `human`. `id`: 1–512. **Not** `model`. |

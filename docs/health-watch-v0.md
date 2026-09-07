@@ -3,7 +3,7 @@
 **Status:** working spec (2026-09-07)  
 **Rules pack:** `brewnix-rules/health-v0.1`  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
-**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) · [fyber.auditor API v0](fyber-auditor-api-v0.md)
+**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) · [fyber.auditor API v0](fyber-auditor-api-v0.md) · [fyber.incident binding v0](incident-binding-v0.md) (ops open/join on required notify; never joins security)
 
 Goal: a **zero-LLM** health watch from `feature_bundle.health`, using the same envelopes and receipts as the IDS contain loop. Conservative policy. This is a **sibling non-IDS pack** — it does not emit `firewall.block_ip` / `firewall.unblock_ip`.
 
@@ -45,8 +45,8 @@ Locked bundle fields (`schemas/feature_bundle.v0.json`): `cpu` / `disk` are 0–
 ## Policy (conservative)
 
 - **Auto-execute off** for health tools in v0.1. Optional later: Suricata restart `execute` after **N** failed checks + cooldown (explicit amendment).
-- Default: `propose` the companion health tool (when one exists) **and required** `notify.operator` → `fyber.auditor` (reuse the notify door / [plane ticket](fyber-auditor-api-v0.md)).
-- **Cooldown** per `(node, unit)` against restart storms: a second `health.restart_service` propose for the same pair inside the window is **suppressed** (`observe`; no second ticket).
+- Default: `propose` the companion health tool (when one exists) **and required** `notify.operator` → `fyber.auditor` (reuse the notify door / [plane ticket](fyber-auditor-api-v0.md)). Required health notify opens or joins an `ops` [incident](incident-binding-v0.md) on `(node, unit)` or health signal class — **never** a security IP case.
+- **Cooldown** per `(node, unit)` against restart storms: a second `health.restart_service` propose for the same pair inside the window is **suppressed** (`observe`; no second ticket; no new [incident](incident-binding-v0.md)).
 - Reject unknown tools / bad args (JSON Schema). Do not add `shell.exec`, disk wipes, or route flaps.
 - IDS rate-limit **B** does not apply here; health has its own cooldown, not the block-per-hour cap.
 
