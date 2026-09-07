@@ -1,13 +1,13 @@
 # Hypermesh preempt v0
 
-**Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test + H3 drain-executor amendment)  
+**Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test + H3 drain-executor amendment + H4 owner-actuator inventory)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**; tools already in `common.v0`  
 **Site / Host contract:** Hypermesh preempt policy + Host job path (docs-first; **not** a new file under `schemas/`)  
 **Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (explicit `tool_allowlist_add`; **never** implied by `rails_profile`) · [Model triage v0](model-triage-v0.md) (LLM judges only; PAIR is an engine) · [fyber.incident binding v0](incident-binding-v0.md) (`lease_stop` execute needs an open `incident_id`) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) (contain stays OPNsense; this spec is not that loop) · [SociACL IR binding v0](sociacl-ir-binding-v0.md) (`delegate execute` on `:host` when Host exists; Checkout **not** a SociACL consumer) · [Panopticon sell-pause-v0](https://github.com/FyberLabs/panopticon/blob/main/products/hypermesh/docs/sell-pause-v0.md) (CP job + result schema)
 
 Goal: a **typed preempt path** for Hypermesh sell/lease actuators. Brewnix **proposes**. The Host **executes**. Policy decides `propose` vs `execute` with **asymmetric** gates: `sell_pause` blast is smaller than `lease_stop`. Drain sequencing is **Brewnix H3** — two CP jobs, not a Host mega-job. The LLM never executes. PAIR is not this path.
 
-**Home:** this repo holds the **Brewnix → Host API** contract (MIT / OSS intent). **`FyberLabs/hypermesh-host` implements.** H1 (`lease_stop` identity) and H2 (`sell_pause`) are on Host **main**. CP `sell-pause-v0` is on Panopticon **main**. Offline owner actuators still lag — see [Host reality (2026-09-07)](#host-reality-2026-09-07). Site JSON Schemas stay locked; do **not** change `schemas/`.
+**Home:** this repo holds the **Brewnix → Host API** contract (MIT / OSS intent). **`FyberLabs/hypermesh-host` implements.** H1 (`lease_stop` identity), H2 (`sell_pause`), and H4 (offline owner actuators) are on Host **main**. CP `sell-pause-v0` is on Panopticon **main**. See [Host reality (2026-09-07)](#host-reality-2026-09-07). Site JSON Schemas stay locked; do **not** change `schemas/`.
 
 ## Goal / non-goals
 
@@ -26,30 +26,31 @@ Goal: a **typed preempt path** for Hypermesh sell/lease actuators. Brewnix **pro
 | SociACL Check grants | Different plane. Binding: [sociacl-ir-binding-v0](sociacl-ir-binding-v0.md). Checkout is **not** a SociACL consumer of these grants. Owner-console ack (when Host exists) is `delegate execute` on `:host`. |
 | Implying tools via profile | Axiom 6. Profile is a ceiling, not a Hypermesh grant. |
 | Mass-stop without incident / policy | Rate limit + incident gate + strip extras. |
-| Treating iface args as today's Host RPC | Host does **not** accept `{lease_id, reason_code}` or `{device_id, until}` as local offline calls. See [Host reality](#host-reality-2026-09-07). |
+| Treating iface args as today's Host RPC | Host owner POSTs reuse H1/H2 actuators. They are **not** `{lease_id, reason_code}` and **not** a tool named `hypermesh.sell_pause`. See [Host reality](#host-reality-2026-09-07). |
 
 ## Axioms
 
 1. **Owner > renter > market.** Owner console / site-owner capability outranks renter leases and market sell.
 2. **Brewnix proposes; Host executes.** Not OPNsense. These tools are not the zero-LLM contain loop.
-3. **Plane optional for act; offline dignity.** Policy and receipts must work with `plane_reachable: false`. Host inventory may lag this axiom — the lock does not drop it.
+3. **Plane optional for act; offline dignity.** Policy and receipts must work with `plane_reachable: false`. Host **H4** now satisfies the owner-console path. The lock does not drop the axiom if the plane is down.
 4. **LLM judges only; not PAIR.** Model fills `fyber.inference_iface/v0`. PAIR is an optional engine ([model-triage](model-triage-v0.md)), not this actuator, not `actor.kind`.
 5. **`sell_pause` blast < `lease_stop` blast.** Asymmetric execute gates. Drain (`sell_pause` first) before stop.
 6. **Hypermesh tools are NEVER implied by `rails_profile` alone.** Execute eligibility needs an explicit [`tool_allowlist_add`](privilege-grant-v0.md) **or** a human (auditor ticket / owner console). `ir_elevated` default max catalog does **not** include `hypermesh.*`.
 
 ## Host reality (2026-09-07)
 
-Inventory from **Developer Bot (Host)** plus what landed on **main** the same day. This section is **descriptive of today's Host / CP**. It does **not** weaken the locked Brewnix policy gates above. It clarifies the **execution path and remaining gaps**.
+Inventory from **Developer Bot (Host)** plus what landed on **main** the same day (H1, H2, **H4**). This section is **descriptive of today's Host / CP**. It does **not** weaken the locked Brewnix policy gates above. It clarifies the **execution path**. Remaining Host gaps: **no** `preempt_mode=hard` signal; Path B is **not** sell (**AGX Path B remains the live join gate**).
 
 Brewnix iface tools are the **proposal contract**. They are **not** names of local Host binaries or RPCs.
 
 | Fact | Today (Host / CP) | Do not assume |
 |------|-------------------|---------------|
-| `lease_stop` | Job kind `lease_stop` on Host **main** ([PR #5](https://github.com/FyberLabs/hypermesh-host/pull/5) — H1 identity). **Not** a local tool named `hypermesh.lease_stop`. Host **polls** `GET` jobs, **matches `lease_id` to the local handle**, then `docker stop` on `hypermesh-<lease_id>`, `POST` `{passed, image_hash?}`. Handle present + mismatch / empty id → `passed=false`, no stop. No handle → soft no-op `passed=true`. **No `reason_code` on job or result.** | Host accepts `{lease_id, reason_code}` as a local offline call. |
-| `sell_pause` | Job kind `sell_pause` on Host **main** ([PR #6](https://github.com/FyberLabs/hypermesh-host/pull/6) — H2). CP schema + enqueue on Panopticon **main** ([PR #37](https://github.com/FyberLabs/panopticon/pull/37), [`sell-pause-v0`](https://github.com/FyberLabs/panopticon/blob/main/products/hypermesh/docs/sell-pause-v0.md)). Same agent-jobs channel as `lease_stop`. Host persists `$STATE_DIR/sell.json`; matching `device_id` → `paused` + optional `until`; heartbeat reports `sell_state`. Result `{passed, sell_state, until?, device_id?}`. `passed=true` + `n/a` is invalid. | A local offline RPC named `hypermesh.sell_pause`, or that Path B pauses selling. |
-| Path B | Job kind `path_b` / CP `path_b_state`. **Not** sell posture. | `path_b` / `posture.path_b` is `sell_state`, or that a Path B job pauses selling. |
-| Offline / plane-down | **No.** Host loop is **enroll → heartbeat → jobs**. **No** plane-off owner mode. | Host-local owner actuators work with the plane down today. |
-| Drain / identity / receipts | **H1** lease identity is on Host. **H2** `sell_pause` reports `sell_state` on the job result and heartbeat. **No** Host drain mega-job — drain is **Brewnix [H3](#h3-drain-executor-locked-2026-09-07)** (two CP jobs; executor sequences). Soft-idempotent if **no handle**. `lease_stop` result stays `{passed, image_hash?}` — **no** `sell_state` / `path_b` on that result. | Host orders drain then stop as one job, or that `lease_stop` returns posture fields. |
+| `lease_stop` | Job kind `lease_stop` on Host **main** ([PR #5](https://github.com/FyberLabs/hypermesh-host/pull/5) — H1 identity). **Not** a local tool named `hypermesh.lease_stop`. Host **polls** `GET` jobs, **matches `lease_id` to the local handle**, then `docker stop` on `hypermesh-<lease_id>`, `POST` `{passed, image_hash?}`. Handle present + mismatch / empty id → `passed=false`, no stop. No handle → soft no-op `passed=true`. **No `reason_code` on job or result.** H4 owner `POST /v0/lease_stop` reuses this actuator. | Host accepts `{lease_id, reason_code}` as a local call. |
+| `sell_pause` | Job kind `sell_pause` on Host **main** ([PR #6](https://github.com/FyberLabs/hypermesh-host/pull/6) — H2). CP schema + enqueue on Panopticon **main** ([PR #37](https://github.com/FyberLabs/panopticon/pull/37), [`sell-pause-v0`](https://github.com/FyberLabs/panopticon/blob/main/products/hypermesh/docs/sell-pause-v0.md)). Same agent-jobs channel as `lease_stop`. Host persists `$STATE_DIR/sell.json`; matching `device_id` → `paused` + optional `until`; heartbeat reports `sell_state`. Result `{passed, sell_state, until?, device_id?}`. `passed=true` + `n/a` is invalid. H4 owner `POST /v0/sell_pause` reuses this actuator. | A local RPC named `hypermesh.sell_pause`, or that Path B pauses selling. |
+| Path B | Job kind `path_b` / CP `path_b_state`. **Not** sell posture. **AGX Path B remains the live join gate.** | `path_b` / `posture.path_b` is `sell_state`, or that a Path B job pauses selling. |
+| Offline / plane-down | **H4** on Host **main** ([PR #7](https://github.com/FyberLabs/hypermesh-host/pull/7)). Unix socket `$STATE_DIR/owner.sock` + bearer `$STATE_DIR/owner.token` **0600**. `POST /v0/sell_pause` and `POST /v0/lease_stop` reuse H1/H2 (not CP enqueue). `$STATE_DIR/owner-effects.jsonl` for plane-down effect lines. CLI `hypermesh-agent owner …`. | Owner path is CP job enqueue, loopback TCP, or that Host writes `fyber.receipt`. |
+| Hard preempt | Host has **no** `preempt_mode=hard` signal. v0 never selects `hard`. | Host emits a hard-preempt signal. |
+| Drain / identity / receipts | **H1** lease identity is on Host. **H2** `sell_pause` reports `sell_state` on the job result and heartbeat. **H4** appends `owner-effects.jsonl` (not `fyber.receipt`). **No** Host drain mega-job — drain is **Brewnix [H3](#h3-drain-executor-locked-2026-09-07)** (two CP jobs; executor sequences). Soft-idempotent if **no handle**. `lease_stop` result stays `{passed, image_hash?}` — **no** `sell_state` / `path_b` on that result. | Host orders drain then stop as one job, or that `lease_stop` returns posture fields. |
 
 ### v0 Host path (what actually runs)
 
@@ -57,7 +58,7 @@ Brewnix iface tools are the **proposal contract**. They are **not** names of loc
 2. **`lease_stop` execute (today):** **Panopticon enqueues job `kind=lease_stop`**. Host H1-matches `lease_id` to the local handle, then `docker stop`s `hypermesh-<lease_id>`, posts `{passed, image_hash?}`. Brewnix / policy maps that result onto `execution[]`. Do **not** send `reason_code` as a Host job field; keep it on the envelope / receipt.
 3. **`sell_pause` execute (today):** **Panopticon enqueues job `kind=sell_pause`** (same channel as `lease_stop`). Host H2 applies pause for matching `device_id` and posts `{passed, sell_state, until?, device_id?}`. Heartbeat reports current `sell_state`. Do **not** reuse job kind `path_b`. Do **not** invent `paused` from enqueue alone.
 4. **Drain (H3):** **Brewnix sequences** the two jobs. Not a new Host job kind. See [H3 Drain executor](#h3-drain-executor-locked-2026-09-07).
-5. **Offline owner actuators:** **future Host scope.** Axiom 3 and the owner-console lock stay. Today's Host cannot satisfy them. Site still writes local receipts for propose / hold / notify.
+5. **Offline owner actuators (H4):** unix socket `$STATE_DIR/owner.sock` + bearer `$STATE_DIR/owner.token` **0600**. Owner console / `hypermesh-agent owner …` POSTs `/v0/sell_pause` and `/v0/lease_stop` on this box. Same H1/H2 actuators; **no** CP enqueue. Append `$STATE_DIR/owner-effects.jsonl` (not `fyber.receipt`). Site still writes `fyber.receipt/v0` from those lines. Plane-up execute still uses Panopticon jobs. Axiom 3 stays: Brewnix policy works plane-down; Host now satisfies the owner-console path.
 
 ## Tools (`common.v0` — do not extend)
 
@@ -181,7 +182,7 @@ Still only `site_defense` **+ Host signal**. Host has no signal. **v0 never sele
 
 Local Host / Brewnix UI or CLI with **site owner** capability. Resolution on the receipt: `human.resolution` **`approved`**. Must work **plane-down** (axiom 3).
 
-**Host reality:** no plane-off owner mode today (enroll → heartbeat → jobs). The console lock stays; Host must add owner actuators as future scope. Until then, plane-down sites still write local propose / hold receipts and must not fake a Host apply.
+**Host reality:** H4 on Host **main** satisfies this path. Talk to `$STATE_DIR/owner.sock` with `$STATE_DIR/owner.token` (**0600**). CLI: `hypermesh-agent owner sell-pause [--until=…]` / `hypermesh-agent owner lease-stop --lease-id=…`. Effects in `owner-effects.jsonl`. Site maps those onto `fyber.receipt/v0`. Do **not** enqueue a CP job plane-down. Do **not** invent `applied` without an owner-effects line or job result.
 
 ## Receipts
 
@@ -193,7 +194,7 @@ Same `fyber.receipt/v0` chain as every other door. Idempotent **no-ops are OK** 
 | `purpose` | `health` or `triage` (do not invent a new purpose) |
 | `posture.sell_state` / `path_b` | Update **from Host effect**. H2 `sell_pause` result and heartbeat carry `sell_state` — copy that. `lease_stop` result is still `{passed, image_hash?}` — **no** `sell_state` / `path_b` on that result. Do **not** copy CP `path_b_state` into `sell_state`. Do **not** invent `paused` because a Path B job ran or because CP enqueued `sell_pause`. Unchanged / `n/a` / last known is valid when Host has not reported. |
 | `input.sources` | include `hypermesh_host` when the cycle is preempt |
-| `execution[]` | `executor` like `hypermesh-host@site`, `panopticon:job:sell_pause`, or `panopticon:job:lease_stop`. `effect` may record `device_id` / `lease_id`, `passed`, `sell_state` (pause), optional `image_hash` (stop). Soft no-handle → applied / no-op, not a schema-invalid effect. Pause fail still goes on the receipt even when the `site_defense` exception allows stops. |
+| `execution[]` | `executor` like `hypermesh-host@site`, `hypermesh-host@site:owner`, `panopticon:job:sell_pause`, or `panopticon:job:lease_stop`. Plane-down: copy from `$STATE_DIR/owner-effects.jsonl` (Host effect log — not `fyber.receipt`). `effect` may record `device_id` / `lease_id`, `passed`, `sell_state` (pause), optional `image_hash` (stop). Soft no-handle → applied / no-op, not a schema-invalid effect. Pause fail still goes on the receipt even when the `site_defense` exception allows stops. |
 | `human` | `required: true` on propose / hold. Owner console / auditor approve sets `resolution: approved`. |
 
 ## Privilege-grant composition
@@ -231,7 +232,7 @@ The LLM does not open the record (`opened_by.kind` stays `rule` \| `automation` 
 4. **Elevated without allowlist: no execute.** Active `ir_elevated` / `break_glass` **without** `tool_allowlist_add` for that Hypermesh tool → propose / hold only. Profile alone is insufficient.
 5. **`lease_stop` without incident: propose only.** Even under `break_glass`. Open `incident_id` required to execute.
 6. **Drain order (H3).** Envelope with both execute-eligible tools → executor awaits `sell_pause` **result** before enqueueing any `lease_stop` for that device. Do not stop first. Different devices may parallelize.
-7. **Plane down: Host-local still receipts.** `plane_reachable: false` → site still writes the receipt chain (propose / hold / notify; owner-console apply when that actuator exists). **Host gap:** today's loop cannot enqueue jobs plane-down — do not skip the local receipt, and do not fake `applied` Host effects.
+7. **Plane down: Host-local still receipts.** `plane_reachable: false` → site still writes the receipt chain (propose / hold / notify). Owner-console apply uses Host H4 (`owner.sock` + token; `owner-effects.jsonl`). Do not skip the local receipt. Do not fake a CP job apply. Do not require the plane.
 8. **PAIR unaffected.** PAIR down / preempt does not emit or execute `hypermesh.*`. Triage fallback unchanged.
 9. **H3: both tools, same device.** Pause completes (`passed` + success `sell_state`) before any `lease_stop` enqueue for that device.
 10. **H3: pause fail, non-`site_defense`.** Timeout / `passed=false` / still `selling` for `health_evacuate` (or any non-`site_defense` reason) → **no** automated stops; `hold_human` + notify; receipt records the pause failure.
@@ -242,7 +243,7 @@ The LLM does not open the record (`opened_by.kind` stays `rule` \| `automation` 
 15. **H3: no new Host job kind.** Drain uses only `sell_pause` + `lease_stop`. Executor must not invent a mega-job.
 16. **H3: `hard` never selected without Host signal.** Host has no signal — v0 never selects `hard`, including the `site_defense` pause-fail exception.
 
-Tests 1–6 and 8–16 are implementable against today's Host + CP (H1 + H2 on Host **main**; `sell-pause-v0` on Panopticon **main**; H3 is Brewnix sequencing). Test 7 is the offline-dignity lock; Host owner mode is future scope.
+Tests 1–16 are implementable against today's Host + CP (H1 + H2 + H4 on Host **main**; `sell-pause-v0` on Panopticon **main**; H3 is Brewnix sequencing). Test 7 is the offline-dignity lock; Host H4 satisfies the owner-console path.
 
 ## Change control
 
