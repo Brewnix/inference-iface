@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test + amendment)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Site contract:** model-triage policy + engine list (docs-first; **not** a file under `schemas/`)  
-**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) (hot path; still contains with no model) · [fyber.privilege_grant v0](privilege-grant-v0.md) (`allow_model_execute` + `model_tier`) · [fyber.incident binding v0](incident-binding-v0.md) (model hold/propose opens/joins `security`) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md)
+**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) (hot path; still contains with no model) · [fyber.privilege_grant v0](privilege-grant-v0.md) (`allow_model_execute` + `model_tier`) · [fyber.incident binding v0](incident-binding-v0.md) (model hold/propose opens/joins `security`) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) · [Hypermesh preempt v0](hypermesh-preempt-v0.md) (judge-only proposals; `hypermesh.*` never implied by profile; PAIR unaffected)
 
 Goal: a **judge-only** local model on the **same** pipeline as the zero-LLM loop. The model may fill `fyber.inference_iface/v0`. Policy + typed actuators still execute. Hot critical auto-contain stays rule-deterministic. Prompts never leave the site box.
 
@@ -35,7 +35,7 @@ Goal: a **judge-only** local model on the **same** pipeline as the zero-LLM loop
 3. **Hot critical auto-contain is rule-deterministic.** It works with no model process present. Auto-execute **rule ids** (`port_scan_burst`, …) short-circuit **before** any engine call.
 4. **Prompts are ephemeral and site-local.** Never in receipts, tickets, grants, incidents, or the plane. Same redaction doctrine as the locked schemas.
 5. **~95% local.** Default tier is `local_small`. `plane_ir` / `host_leased` only when an **active** [privilege grant](privilege-grant-v0.md) minted `model_tier` to that value.
-6. **PAIR is an optional engine, not an actor.** It appears under `engines[]` (`kind: pair`). It is not `actor.kind`, not a `model_tier`, and not a required box.
+6. **PAIR is an optional engine, not an actor.** It appears under `engines[]` (`kind: pair`). It is not `actor.kind`, not a `model_tier`, and not a required box. PAIR is **unaffected** by [Hypermesh preempt](hypermesh-preempt-v0.md) — Host jobs are not PAIR, and PAIR preempt is not `hypermesh.*`.
 
 ## `triage_mode`
 
@@ -83,7 +83,7 @@ Derived by policy from the active [grant](privilege-grant-v0.md) `rails_profile`
 
 | Grant / profile | `allow_model_execute` | Model-originated companion tools |
 |-----------------|----------------------|----------------------------------|
-| `rails_profile: strict` **or no grant** | **`false`** | Model may only produce **`propose` / `hold_human` / notify** paths. Policy **must not** auto-execute model-originated companion tool calls (`firewall.block_ip`, `health.restart_service`, …). |
+| `rails_profile: strict` **or no grant** | **`false`** | Model may only produce **`propose` / `hold_human` / notify** paths. Policy **must not** auto-execute model-originated companion tool calls (`firewall.block_ip`, `health.restart_service`, `hypermesh.lease_stop`, `hypermesh.sell_pause`, …). Hypermesh tools are **never** implied by `rails_profile` ([preempt](hypermesh-preempt-v0.md)). |
 | **Active** grant (`approved` and now < `active_until`) with minted `rails_profile` **`ir_elevated` or `break_glass`** | **`true`** | Execute-eligible only for tools in the **active allowlist / profile max catalog**. Still subject to whitelist, rate limit, confidence θ, subject-bind, and JSON Schema. |
 
 `notify.operator` on a hold / ack-required propose is the [auditor door](notify-operator-audit-door.md), not “model execute.” It stays required on those hooks even when `allow_model_execute` is `false`.

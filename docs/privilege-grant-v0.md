@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Plane contract:** `fyber.privilege_grant/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT) · [Model triage v0](model-triage-v0.md) (`allow_model_execute` only on active `ir_elevated` / `break_glass`; PAIR is an engine, not a tier)
+**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT) · [Model triage v0](model-triage-v0.md) (`allow_model_execute` only on active `ir_elevated` / `break_glass`; PAIR is an engine, not a tier) · [Hypermesh preempt v0](hypermesh-preempt-v0.md) (`hypermesh.*` only via explicit `tool_allowlist_add` or human; **not** implied by profile)
 
 Goal: a **bounded, expiring policy elevation** for one `(site_id, incident_id)`. Automations **propose**. A human (or dual-control) **mints**. The site hot-reloads allowlists / budgets / `rails_profile` for that incident only. Executions stay on `fyber.inference_iface/v0` + the typed executor. The LLM never executes.
 
@@ -45,7 +45,7 @@ Unknown `kind` → reject the grant. Extra keys on an ask fail validation. CUT k
 
 | `kind` | Fields | Meaning |
 |--------|--------|---------|
-| `tool_allowlist_add` | `tools` (array, min 1) | Each entry is a locked `ToolName` **or** a pack id (`packs/…`). Those tools become **execute-eligible** under the active profile for this incident. **Cannot remove** tools. Cannot imply `net.quarantine_host` or `hypermesh.lease_stop` — those need an explicit entry when the site is ready. |
+| `tool_allowlist_add` | `tools` (array, min 1) | Each entry is a locked `ToolName` **or** a pack id (`packs/…`). Those tools become **execute-eligible** under the active profile for this incident. **Cannot remove** tools. Cannot imply `net.quarantine_host`, `hypermesh.lease_stop`, or `hypermesh.sell_pause` — those need an explicit entry ([hypermesh-preempt-v0](hypermesh-preempt-v0.md)) when the site is ready. |
 | `rate_limit_raise` | `metric`, `limit` | `metric` enum is **only** `blocks_per_hour`. `limit` is a positive int (new cap). No other meters. |
 | `budget_tokens` | `max_tokens` | Token cap only (**not** USD). **Requires** a `model_tier` ask on the **same** grant. |
 | `model_tier` | `tier` | `local_small` \| `local_large` \| `plane_ir` \| `host_leased`. **PAIR is an engine under `local_*`, not a tier.** |
@@ -66,8 +66,10 @@ Unknown `kind` → reject the grant. Extra keys on an ask fail validation. CUT k
 | Profile | Max catalog (defaults) | Max TTL | Dual-control |
 |---------|------------------------|---------|--------------|
 | `strict` | Site baseline only (zero-LLM contain set + locked notify). No elevation catalog. | — (no elevated grant; use a ticket for one-shot) | — |
-| `ir_elevated` | `tool_allowlist_add` ⊆ `{health.restart_service, notify.operator}` + `ids.suricata_pass` **optional**; `rate_limit_raise`; `budget_tokens` + `model_tier` ∈ `{local_small, local_large}`; `prompt_route` ⊆ IR templates | ≤ **8h** (28800s) | optional |
-| `break_glass` | All of `ir_elevated` + `model_tier` ∈ `{plane_ir, host_leased}` + emergency templates + tools ⊆ `packs/emergency-v0` (pack **may ship empty**) | ≤ **60m** (prefer **30m**) | **enterprise required**; **home** = owner + **required** auditor ticket |
+| `ir_elevated` | `tool_allowlist_add` ⊆ `{health.restart_service, notify.operator}` + `ids.suricata_pass` **optional**; `rate_limit_raise`; `budget_tokens` + `model_tier` ∈ `{local_small, local_large}`; `prompt_route` ⊆ IR templates. **`hypermesh.*` is not in this default max catalog.** | ≤ **8h** (28800s) | optional |
+| `break_glass` | All of `ir_elevated` + `model_tier` ∈ `{plane_ir, host_leased}` + emergency templates + tools ⊆ `packs/emergency-v0` (pack **may ship empty**; still **does not** imply `hypermesh.*` unless the pack lists them) | ≤ **60m** (prefer **30m**) | **enterprise required**; **home** = owner + **required** auditor ticket |
+
+**Amendment (2026-09-07, Hypermesh preempt):** `hypermesh.lease_stop` and `hypermesh.sell_pause` are **not** in the `ir_elevated` default max catalog. They are never implied by `rails_profile` — explicit `tool_allowlist_add` or a human only. See [hypermesh-preempt-v0](hypermesh-preempt-v0.md).
 
 ### Ladder rules
 
@@ -75,7 +77,7 @@ Unknown `kind` → reject the grant. Extra keys on an ask fail validation. CUT k
 - **Profile null** → treat as **strict + named deltas**. Each ask must be a valid v0 kind and must fit the **strict** ceiling (baseline). Anything that needs `ir_elevated` / `break_glass` must name that profile.
 - **Approve may drop asks** (amend down). Approve **must not** add asks, widen tools/templates, raise TTL, or lift `rails_profile` past what was requested.
 - **`break_glass` forces** TTL clamp to the profile max (prefer 30m), an auditor ticket with `reason_code: break_glass`, `resolution.notes_redacted` on approve, and a **Phase B cooldown** before the next `break_glass` on that site. Cooldown keys off `closed_at` of the [incident](incident-binding-v0.md) that held the grant (same idea as the notify door’s post-action cycle — not a second grant kind).
-- **`net.quarantine_host` / `hypermesh.lease_stop` are not implied** by any profile. Add them only via explicit `tool_allowlist_add` when those actuators are ready — and only if the active profile max catalog includes them (today: not in `ir_elevated` defaults; only if listed in `packs/emergency-v0`).
+- **`net.quarantine_host` / `hypermesh.lease_stop` / `hypermesh.sell_pause` are not implied** by any profile. Add them only via explicit `tool_allowlist_add` when those actuators are ready — and only if the active profile max catalog includes them (today: **`hypermesh.*` is not in the `ir_elevated` default max catalog**; only if listed in `packs/emergency-v0`). See [hypermesh-preempt-v0](hypermesh-preempt-v0.md).
 - **Single grant TTL.** No per-ask TTL. `ttl_s` on resolve is the one clock.
 - **`blast_radius` is `site` only** in v0.
 
@@ -214,7 +216,7 @@ The UI must not treat ticket `approved` as an elevation, or grant `approved` as 
 2. **`break_glass` TTL over max rejected or clamped.** `ttl_s_requested: 7200` with `rails_profile_requested: break_glass` → reject **or** clamp to ≤ 3600 (prefer 1800) on approve. Never mint 2h break-glass.
 3. **Empty asks rejected.** `asks: []` → refuse; caller should open a ticket for one-shot approve.
 4. **Budget without `model_tier` rejected.** `budget_tokens` and no sibling `model_tier` → reject.
-5. **Asks outside profile max rejected or amended down.** e.g. `model_tier: host_leased` on `ir_elevated`, or `tool_allowlist_add` of `hypermesh.lease_stop` when not in catalog → reject the propose **or** drop that ask on approve. Never mint past the profile.
+5. **Asks outside profile max rejected or amended down.** e.g. `model_tier: host_leased` on `ir_elevated`, or `tool_allowlist_add` of `hypermesh.lease_stop` / `hypermesh.sell_pause` when not in catalog (`hypermesh.*` ∉ `ir_elevated` defaults) → reject the propose **or** drop that ask on approve. Never mint past the profile.
 6. **After `active_until`, elevated execute denied.** Policy is `strict` again. Baseline zero-LLM tools unchanged; IR-only tools / tiers / routes from the grant are not execute-eligible.
 7. **LLM never in the executor.** Mint and execute paths are policy + human + typed actuators. No model `resolved_by`.
 8. **No prompts in the grant body.** `reason_redacted` / `notes_redacted` only; no prompt text, packet payloads, or renter chat. Same doctrine as tickets / receipts.

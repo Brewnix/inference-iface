@@ -1,0 +1,146 @@
+{
+  "sell_pause_propose": {
+    "schema": "fyber.inference_iface/v0",
+    "trace_id": "550e8400-e29b-41d4-a716-4466554400b0",
+    "site_id": "net-tn-cottage",
+    "actor": {
+      "kind": "rule",
+      "id": "brewnix-rules/hypermesh-preempt-v0",
+      "purpose": "triage"
+    },
+    "observed_at": "2026-09-07T19:00:00Z",
+    "inputs_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "judgment": {
+      "severity": "high",
+      "classes": ["health"],
+      "subjects": [{ "kind": "host", "value": "jetson-cottage-01" }],
+      "summary": "Health evacuate: pause sell on jetson-cottage-01",
+      "evidence_refs": ["health:thermal"]
+    },
+    "proposals": [
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400b1",
+        "tool": "hypermesh.sell_pause",
+        "mode": "propose",
+        "reason_code": "health_evacuate",
+        "args": {
+          "device_id": "jetson-cottage-01",
+          "until": "2026-09-07T23:00:00Z"
+        }
+      },
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400b2",
+        "tool": "notify.operator",
+        "mode": "execute",
+        "reason_code": "health_evacuate",
+        "args": {
+          "channel": "fyber.auditor",
+          "severity": "high",
+          "text_redacted": "health_evacuate site=net-tn-cottage device_id=jetson-cottage-01 tool=hypermesh.sell_pause"
+        }
+      }
+    ],
+    "confidence": 1.0,
+    "needs_human": true
+  },
+  "lease_stop_propose_strict": {
+    "schema": "fyber.inference_iface/v0",
+    "trace_id": "550e8400-e29b-41d4-a716-4466554400c0",
+    "site_id": "net-tn-cottage",
+    "actor": {
+      "kind": "rule",
+      "id": "brewnix-rules/hypermesh-preempt-v0",
+      "purpose": "triage"
+    },
+    "observed_at": "2026-09-07T19:05:00Z",
+    "inputs_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "judgment": {
+      "severity": "critical",
+      "classes": ["port_scan"],
+      "subjects": [{ "kind": "lease", "value": "lease-203-0-113-50" }],
+      "summary": "Site defense propose lease_stop under strict; no auto-execute",
+      "evidence_refs": ["eve:cluster-1"]
+    },
+    "proposals": [
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400c1",
+        "tool": "hypermesh.lease_stop",
+        "mode": "propose",
+        "reason_code": "site_defense",
+        "args": {
+          "lease_id": "lease-203-0-113-50",
+          "reason_code": "site_defense"
+        }
+      },
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400c2",
+        "tool": "notify.operator",
+        "mode": "execute",
+        "reason_code": "propose_needs_ack",
+        "args": {
+          "channel": "fyber.auditor",
+          "severity": "critical",
+          "text_redacted": "propose_needs_ack site=net-tn-cottage tool=hypermesh.lease_stop lease_id=lease-203-0-113-50 reason=site_defense rails_profile=strict"
+        }
+      }
+    ],
+    "confidence": 1.0,
+    "needs_human": true
+  },
+  "drain_both_propose": {
+    "schema": "fyber.inference_iface/v0",
+    "trace_id": "550e8400-e29b-41d4-a716-4466554400d0",
+    "site_id": "net-tn-cottage",
+    "actor": {
+      "kind": "rule",
+      "id": "brewnix-rules/hypermesh-preempt-v0",
+      "purpose": "triage"
+    },
+    "observed_at": "2026-09-07T19:10:00Z",
+    "inputs_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "judgment": {
+      "severity": "high",
+      "classes": ["health"],
+      "subjects": [
+        { "kind": "host", "value": "jetson-cottage-01" },
+        { "kind": "lease", "value": "lease-203-0-113-50" }
+      ],
+      "summary": "Drain: sell_pause then lease_stop (order locked)",
+      "evidence_refs": ["health:thermal"]
+    },
+    "proposals": [
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400d1",
+        "tool": "hypermesh.sell_pause",
+        "mode": "propose",
+        "reason_code": "health_evacuate",
+        "args": {
+          "device_id": "jetson-cottage-01"
+        }
+      },
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400d2",
+        "tool": "hypermesh.lease_stop",
+        "mode": "propose",
+        "reason_code": "health_evacuate",
+        "args": {
+          "lease_id": "lease-203-0-113-50",
+          "reason_code": "health_evacuate"
+        }
+      },
+      {
+        "call_id": "550e8400-e29b-41d4-a716-4466554400d3",
+        "tool": "notify.operator",
+        "mode": "execute",
+        "reason_code": "health_evacuate",
+        "args": {
+          "channel": "fyber.auditor",
+          "severity": "high",
+          "text_redacted": "health_evacuate site=net-tn-cottage drain sell_pause then lease_stop device_id=jetson-cottage-01"
+        }
+      }
+    ],
+    "confidence": 1.0,
+    "needs_human": true
+  }
+}
