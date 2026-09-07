@@ -25,9 +25,11 @@ examples/
   envelope.example.json
   receipt.example.json
   notify.operator.example.json
+  auditor.ticket.example.json
 docs/
   zero-llm-opnsense-loop.md
   notify-operator-audit-door.md
+  fyber-auditor-api-v0.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -62,4 +64,5 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 ## Specs
 
 - [Zero-LLM OPNsense detect → block → receipt loop](docs/zero-llm-opnsense-loop.md) — first executor path (`actor.kind: rule`)
-- [notify.operator ↔ shared auditor door](docs/notify-operator-audit-door.md) — plane auditor API; required on `hold_human` / high `propose`
+- [notify.operator ↔ shared auditor door](docs/notify-operator-audit-door.md) — site half of the plane auditor door; required on `hold_human` / high `propose`
+- [fyber.auditor API v0](docs/fyber-auditor-api-v0.md) — locked plane ticket contract (`fyber.auditor.ticket/v0`); Panopticon implements

@@ -1,0 +1,100 @@
+{
+  "create": {
+    "schema": "fyber.auditor.ticket/v0",
+    "site_id": "net-tn-cottage",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440020",
+    "receipt_id": "550e8400-e29b-41d4-a716-446655440030",
+    "held_call_id": "550e8400-e29b-41d4-a716-446655440021",
+    "reason_code": "rate_limit_hold",
+    "severity": "high",
+    "text_redacted": "hold_human site=net-tn-cottage receipt_id=550e8400-e29b-41d4-a716-446655440030 ip=203.0.113.50 rule=ssh_brute",
+    "display": {
+      "tool": "firewall.block_ip",
+      "subject": { "kind": "ip", "value": "203.0.113.50" },
+      "ttl_s": 86400
+    }
+  },
+  "resolve": {
+    "resolution": "approved",
+    "resolved_by": "panopticon:user:chris",
+    "notes_redacted": "ack ssh_brute hold; apply 24h block"
+  },
+  "resolve_amended": {
+    "resolution": "amended",
+    "resolved_by": "panopticon:user:chris",
+    "patch": { "ttl_s": 3600 },
+    "notes_redacted": "shorten ttl_s to 1h; do not replay 86400"
+  },
+  "ack": {
+    "receipt_id": "550e8400-e29b-41d4-a716-446655440050"
+  },
+  "get_open": {
+    "schema": "fyber.auditor.ticket/v0",
+    "ticket_id": "550e8400-e29b-41d4-a716-446655440040",
+    "site_id": "net-tn-cottage",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440020",
+    "receipt_id": "550e8400-e29b-41d4-a716-446655440030",
+    "held_call_id": "550e8400-e29b-41d4-a716-446655440021",
+    "reason_code": "rate_limit_hold",
+    "severity": "high",
+    "text_redacted": "hold_human site=net-tn-cottage receipt_id=550e8400-e29b-41d4-a716-446655440030 ip=203.0.113.50 rule=ssh_brute",
+    "display": {
+      "tool": "firewall.block_ip",
+      "subject": { "kind": "ip", "value": "203.0.113.50" },
+      "ttl_s": 86400
+    },
+    "status": "open",
+    "resolution": null,
+    "resolved_by": null,
+    "resolved_at": null,
+    "patch": null,
+    "notes_redacted": null,
+    "site_acked_receipt_id": null
+  },
+  "get_resolved": {
+    "schema": "fyber.auditor.ticket/v0",
+    "ticket_id": "550e8400-e29b-41d4-a716-446655440040",
+    "site_id": "net-tn-cottage",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440020",
+    "receipt_id": "550e8400-e29b-41d4-a716-446655440030",
+    "held_call_id": "550e8400-e29b-41d4-a716-446655440021",
+    "reason_code": "rate_limit_hold",
+    "severity": "high",
+    "text_redacted": "hold_human site=net-tn-cottage receipt_id=550e8400-e29b-41d4-a716-446655440030 ip=203.0.113.50 rule=ssh_brute",
+    "display": {
+      "tool": "firewall.block_ip",
+      "subject": { "kind": "ip", "value": "203.0.113.50" },
+      "ttl_s": 86400
+    },
+    "status": "resolved",
+    "resolution": "approved",
+    "resolved_by": "panopticon:user:chris",
+    "resolved_at": "2026-09-07T14:00:00Z",
+    "patch": null,
+    "notes_redacted": "ack ssh_brute hold; apply 24h block",
+    "site_acked_receipt_id": null
+  },
+  "get_acked": {
+    "schema": "fyber.auditor.ticket/v0",
+    "ticket_id": "550e8400-e29b-41d4-a716-446655440040",
+    "site_id": "net-tn-cottage",
+    "trace_id": "550e8400-e29b-41d4-a716-446655440020",
+    "receipt_id": "550e8400-e29b-41d4-a716-446655440030",
+    "held_call_id": "550e8400-e29b-41d4-a716-446655440021",
+    "reason_code": "rate_limit_hold",
+    "severity": "high",
+    "text_redacted": "hold_human site=net-tn-cottage receipt_id=550e8400-e29b-41d4-a716-446655440030 ip=203.0.113.50 rule=ssh_brute",
+    "display": {
+      "tool": "firewall.block_ip",
+      "subject": { "kind": "ip", "value": "203.0.113.50" },
+      "ttl_s": 86400
+    },
+    "status": "acked",
+    "resolution": "approved",
+    "resolved_by": "panopticon:user:chris",
+    "resolved_at": "2026-09-07T14:00:00Z",
+    "patch": null,
+    "notes_redacted": "ack ssh_brute hold; apply 24h block",
+    "site_acked_receipt_id": "550e8400-e29b-41d4-a716-446655440050"
+  }
+}
