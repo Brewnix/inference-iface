@@ -95,7 +95,12 @@ Docs-first resource. Extra keys fail validation. Shape reference: `examples/priv
   "requested_at": "2026-09-07T15:00:00Z",
   "requested_by": { "kind": "automation", "id": "brewnix-policy/v0" },
   "reason_redacted": "…",
-  "asks": [],
+  "asks": [
+    {
+      "kind": "tool_allowlist_add",
+      "tools": ["health.restart_service", "notify.operator"]
+    }
+  ],
   "rails_profile_requested": "ir_elevated",
   "ttl_s_requested": 14400,
   "blast_radius": "site",
