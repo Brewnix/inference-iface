@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Site contract:** `fyber.incident/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (requires `incident_id`) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot ticket; empty-ask stays there) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [Health-watch v0.1](health-watch-v0.md) · [Model triage v0](model-triage-v0.md) (model hold/propose opens/joins `security`; policy writes the record, not the LLM)
+**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (requires `incident_id`) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot ticket; empty-ask stays there) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [Health-watch v0.1](health-watch-v0.md) · [Model triage v0](model-triage-v0.md) (model hold/propose opens/joins `security`; policy writes the record, not the LLM) · [Hypermesh preempt v0](hypermesh-preempt-v0.md) (`lease_stop` execute needs an open incident; `sell_pause` prefers `ops` for health)
 
 Goal: a **site-local overlay case** that groups multiple receipt cycles. A `trace_id` is one cycle. An `incident_id` is the multi-cycle case. Contain and `firewall.block_ip` **never** wait on this store. Grants **do** require an `incident_id`. Quiet observe / unscoped receipts do not.
 
@@ -113,6 +113,8 @@ Ops shapes (v0):
 | `hold_human` / `propose` + required `notify.operator` (IDS / contain; rules or [model-triage](model-triage-v0.md) — `opened_by.kind` is still not `model`) | open or join | `security` |
 | Health notify **required** | open or join | `ops` |
 | Grant / `break_glass` | **require** existing or **open** (usually `security`) | existing `kind`, or `security` when opening |
+| Hypermesh `lease_stop` **execute** | **require** existing open `incident_id` (force propose if missing, including `break_glass`) — [preempt](hypermesh-preempt-v0.md) | existing `kind`; usually `security` for `site_defense` / `incident_preempt` |
+| Hypermesh `sell_pause` | Security incident **not** required. **Ops** preferred for `health_evacuate` | `ops` (health) or existing |
 | Expiry (`brewnix-rules/expiry` / `firewall.unblock_ip`) | **inherit parent incident only**; never open new | parent `kind` |
 | Quiet observe / whitelist dedupe / unscoped | **no** incident | — |
 

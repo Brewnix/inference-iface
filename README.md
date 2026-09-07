@@ -31,6 +31,7 @@ examples/
   privilege_grant.example.json
   incident.example.json
   model-triage.envelope.example.json
+  hypermesh-preempt.example.json
 docs/
   zero-llm-opnsense-loop.md
   expiry-unblock-loop.md
@@ -40,6 +41,7 @@ docs/
   privilege-grant-v0.md
   incident-binding-v0.md
   model-triage-v0.md
+  hypermesh-preempt-v0.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -81,3 +83,4 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 - [fyber.privilege_grant v0](docs/privilege-grant-v0.md) — locked plane/site grant (`fyber.privilege_grant/v0`); automations propose, human mints; **not** a one-shot ticket
 - [fyber.incident binding v0](docs/incident-binding-v0.md) — locked overlay case (`fyber.incident/v0`); site open/close SoT; never gates contain; side index until schema amend
 - [Model triage v0](docs/model-triage-v0.md) — locked judge-only model path (`actor.kind: model`); `rules_primary` default; never in the executor; no `schemas/` change
+- [Hypermesh preempt v0](docs/hypermesh-preempt-v0.md) — locked Host preempt (`hypermesh.lease_stop` / `hypermesh.sell_pause`); Brewnix proposes, Host executes; tools **never** implied by `rails_profile`; Host inventory may lag; no `schemas/` change
