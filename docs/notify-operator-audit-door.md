@@ -2,9 +2,11 @@
 
 **Status:** working spec (2026-09-06)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
-**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md)
+**Companion:** [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (plane ticket: `fyber.auditor.ticket/v0`)
 
 Goal: when policy cannot auto-execute (rate-limit hold, non-auto propose) or after an action needs review, the site posts a **typed** `notify.operator` to a **shared auditor API** in the Hypermesh / Panopticon plane. The site still writes a local `fyber.receipt/v0` first. The plane is a door, not a prerequisite.
+
+Plane half (create / get / resolve / ack): [fyber.auditor API v0](fyber-auditor-api-v0.md). `notify.operator` is the site actuator that POSTs `fyber.auditor.ticket/v0`. The ticket is inbox + resolution **intent** until the site acks with an apply / observe receipt.
 
 ## Goal / non-goals
 
@@ -85,7 +87,7 @@ Until additive fields exist, put `receipt_id` in `text_redacted` (as above) and/
 Not OPNsense. A site-local notify actuator calls the **shared auditor API** (Hypermesh / Panopticon plane).
 
 1. Validate `channel` ∈ policy allowlist (`fyber.auditor` required on Phase A hooks).
-2. If `plane_reachable: true` → POST the redacted notify (plus any plane-side auth the service defines). Record `execution.status: "applied"`.
+2. If `plane_reachable: true` → `POST /v0/tickets` per [fyber.auditor API v0](fyber-auditor-api-v0.md) (Panopticon machine/site token). Record `execution.status: "applied"`.
 3. If plane down or the POST fails → **durable queue**; record `execution.status: "applied"` with `effect.queued: true` (or `failed` only if the queue itself cannot persist). Never drop the local receipt.
 4. Append `execution[]`:
 
@@ -122,6 +124,8 @@ Drain the queue when the plane returns; do not rewrite the original receipt. A l
 Rule bumps: `actor.kind: "rule"`, `actor.id` like `brewnix-rules/v0.2` (or `brewnix-rules/v0.1+amend-<short>`). Do not mutate a past receipt's actor. Phase B auditor review is how a human changes **future** rules, not the locked schemas.
 
 Pending: `human.required: true`, `resolved_by` / `resolved_at` / `resolution` all `null`.
+
+Plane `POST /v0/tickets/{id}/resolve` is **intent** only. After the site writes the apply / observe receipt, `POST /v0/tickets/{id}/ack` ([fyber.auditor API v0](fyber-auditor-api-v0.md)). UI must not claim blocked until that ack (or a timed_out waiting state).
 
 ## Acceptance tests
 
