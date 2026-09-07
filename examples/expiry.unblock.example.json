@@ -1,0 +1,33 @@
+{
+  "schema": "fyber.inference_iface/v0",
+  "trace_id": "550e8400-e29b-41d4-a716-446655440060",
+  "site_id": "net-tn-cottage",
+  "actor": {
+    "kind": "rule",
+    "id": "brewnix-rules/expiry",
+    "purpose": "triage"
+  },
+  "observed_at": "2026-09-07T22:00:00Z",
+  "inputs_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "judgment": {
+    "severity": "info",
+    "classes": ["unknown"],
+    "subjects": [{ "kind": "ip", "value": "203.0.113.50" }],
+    "summary": "TTL expired for 203.0.113.50 on ai_autoblock",
+    "evidence_refs": ["ledger:ttl:203.0.113.50"]
+  },
+  "proposals": [
+    {
+      "call_id": "550e8400-e29b-41d4-a716-446655440061",
+      "tool": "firewall.unblock_ip",
+      "mode": "execute",
+      "reason_code": "ttl_expired",
+      "args": {
+        "ip": "203.0.113.50",
+        "alias": "ai_autoblock"
+      }
+    }
+  ],
+  "confidence": 1.0,
+  "needs_human": false
+}

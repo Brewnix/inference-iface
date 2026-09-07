@@ -26,8 +26,12 @@ examples/
   receipt.example.json
   notify.operator.example.json
   auditor.ticket.example.json
+  expiry.unblock.example.json
+  health.watch.example.json
 docs/
   zero-llm-opnsense-loop.md
+  expiry-unblock-loop.md
+  health-watch-v0.md
   notify-operator-audit-door.md
   fyber-auditor-api-v0.md
 ```
@@ -64,5 +68,7 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 ## Specs
 
 - [Zero-LLM OPNsense detect → block → receipt loop](docs/zero-llm-opnsense-loop.md) — first executor path (`actor.kind: rule`)
+- [Expiry → unblock → receipt](docs/expiry-unblock-loop.md) — TTL ledger + `brewnix-rules/expiry` so `ai_autoblock` members do not rot
+- [Health-watch v0.1](docs/health-watch-v0.md) — sibling non-IDS pack from `feature_bundle.health` (propose + notify; no auto-execute)
 - [notify.operator ↔ shared auditor door](docs/notify-operator-audit-door.md) — site half of the plane auditor door; required on `hold_human` / high `propose`
 - [fyber.auditor API v0](docs/fyber-auditor-api-v0.md) — locked plane ticket contract (`fyber.auditor.ticket/v0`); Panopticon implements

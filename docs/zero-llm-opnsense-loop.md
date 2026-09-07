@@ -21,7 +21,7 @@ Goal: Suricata / OPNsense alerts → contain → receipt, using the same envelop
 1. Alias `ai_autoblock` (type: Host(s)).
 2. WAN rule: block source in `ai_autoblock` (created once; never rewritten per event).
 3. API user with rights to `firewall/alias_util` (add/remove) — not full admin if avoidable.
-4. Optional cron / job queue: expire members when `ttl_s` elapsed (executor records `status: "expired"`).
+4. Optional cron / job queue: expire members when `ttl_s` elapsed (executor records `status: "expired"`). Full loop: [Expiry → unblock → receipt](expiry-unblock-loop.md).
 
 ## Pipeline
 
@@ -36,7 +36,7 @@ Build `fyber.feature_bundle/v0` from the window:
 
 - `counts.alert_total`, `by_sid`, `by_src`
 - `top_subjects[]` (`ip`, `hits`, `ports`, `sids`)
-- `health` (`cpu` / `disk` / `wan_gateways` / `suricata`)
+- `health` (`cpu` / `disk` / `wan_gateways` / `suricata`) — consumed by the sibling **non-IDS** pack [health-watch v0.1](health-watch-v0.md), not by this contain loop
 - `whitelist_hits`, `prior_blocks` (current alias members + remaining TTL)
 
 `features_digest` = `sha256:` + SHA-256 of **canonical JSON** of that bundle.  
@@ -95,7 +95,7 @@ For each proposal with policy decision `execute`:
 2. Enqueue removal at `now + ttl_s`.
 3. Append `execution[]`: `status` `applied` \| `failed`, `executor: "opnsense-api@site"`, `effect: { "alias", "ip", "ttl_s" }`.
 
-**Expiry:** a rules actor `id: "brewnix-rules/expiry"` emits `firewall.unblock_ip`; executor removes from alias; write a receipt with `execution.status: "expired"` or `applied` on unblock.
+**Expiry:** a rules actor `id: "brewnix-rules/expiry"` emits `firewall.unblock_ip`; executor removes from alias; write a receipt with `execution.status: "expired"` or `applied` on unblock. Site-local TTL ledger + policy (no IDS-driven unblock, rate limits do not trap expired members): [Expiry → unblock → receipt](expiry-unblock-loop.md).
 
 ### 5. Receipt (`fyber.receipt/v0`)
 
@@ -132,7 +132,7 @@ Shape reference: `examples/receipt.example.json`.
 3. Whitelisted IP never blocked.
 4. Run with no model process present → loop still contains.
 5. `plane_reachable: false` → still blocks and writes receipts.
-6. After `ttl_s`, IP removed; receipt chain continues unbroken.
+6. After `ttl_s`, IP removed; receipt chain continues unbroken (see [expiry-unblock-loop](expiry-unblock-loop.md)).
 
 ## Non-goals
 
@@ -146,6 +146,8 @@ Shape reference: `examples/receipt.example.json`.
 ```
 brewnix-site-defense/          # or module under proxmox-firewall
   rules/v0.1.yaml
+  rules/expiry.py              # sibling contain TTL — expiry-unblock-loop.md
+  rules/health-v0.1.yaml       # sibling non-IDS pack — health-watch-v0.md
   policy.py
   sensors/eve_to_bundle.py
   exec/opnsense_alias.py
