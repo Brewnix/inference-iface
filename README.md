@@ -30,6 +30,7 @@ examples/
   health.watch.example.json
   privilege_grant.example.json
   incident.example.json
+  model-triage.envelope.example.json
 docs/
   zero-llm-opnsense-loop.md
   expiry-unblock-loop.md
@@ -38,6 +39,7 @@ docs/
   fyber-auditor-api-v0.md
   privilege-grant-v0.md
   incident-binding-v0.md
+  model-triage-v0.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -78,3 +80,4 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 - [fyber.auditor API v0](docs/fyber-auditor-api-v0.md) — locked plane ticket contract (`fyber.auditor.ticket/v0`); Panopticon implements
 - [fyber.privilege_grant v0](docs/privilege-grant-v0.md) — locked plane/site grant (`fyber.privilege_grant/v0`); automations propose, human mints; **not** a one-shot ticket
 - [fyber.incident binding v0](docs/incident-binding-v0.md) — locked overlay case (`fyber.incident/v0`); site open/close SoT; never gates contain; side index until schema amend
+- [Model triage v0](docs/model-triage-v0.md) — locked judge-only model path (`actor.kind: model`); `rules_primary` default; never in the executor; no `schemas/` change
