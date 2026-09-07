@@ -2,7 +2,8 @@
 
 **Status:** working spec (2026-09-06)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`)  
-**Actor:** `kind: "rule"` only — no LLM, no SaaS on the hot path
+**Actor:** `kind: "rule"` only — no LLM, no SaaS on the hot path  
+**Companion:** [fyber.incident binding v0](incident-binding-v0.md) (overlay case; **never** gates contain) · [Expiry → unblock → receipt](expiry-unblock-loop.md) · [Health-watch v0.1](health-watch-v0.md)
 
 Goal: Suricata / OPNsense alerts → contain → receipt, using the same envelopes a later local model can fill without changing the executor.
 
@@ -79,10 +80,10 @@ On each envelope:
 2. If IP in static whitelist → `observe`.
 3. If IP already in `ai_autoblock` with remaining TTL → `observe` (dedupe).
 4. Rate limit: max **B** new blocks / hour / site (default B = 30) → else `hold_human` (**requires** `notify.operator`).
-5. Else if `severity` is `critical` and rule id ∈ auto set (`port_scan_burst`, …) → `execute`.
+5. Else if `severity` is `critical` and rule id ∈ auto set (`port_scan_burst`, …) → `execute` (open or join a `security` [incident](incident-binding-v0.md); **never** gate the block on that write).
 6. Else if `severity` is `high` → **`propose` only** in v0.1 (**requires** `notify.operator`; no auto block). Critical-only auto keeps false positives recoverable.
 
-Notify door (channel `fyber.auditor`, queue-if-offline, human resolution): [notify.operator ↔ shared auditor door](notify-operator-audit-door.md).
+Notify door (channel `fyber.auditor`, queue-if-offline, human resolution): [notify.operator ↔ shared auditor door](notify-operator-audit-door.md). `hold_human` / ack-required `propose` also opens or joins a `security` [incident](incident-binding-v0.md). Quiet observe / whitelist dedupe does not.
 
 Record `policy.rule_ids` as the matching detector ids (e.g. `["port_scan_burst"]`).  
 `policy.engine` = `brewnix-policy/v0`.
@@ -95,7 +96,7 @@ For each proposal with policy decision `execute`:
 2. Enqueue removal at `now + ttl_s`.
 3. Append `execution[]`: `status` `applied` \| `failed`, `executor: "opnsense-api@site"`, `effect: { "alias", "ip", "ttl_s" }`.
 
-**Expiry:** a rules actor `id: "brewnix-rules/expiry"` emits `firewall.unblock_ip`; executor removes from alias; write a receipt with `execution.status: "expired"` or `applied` on unblock. Site-local TTL ledger + policy (no IDS-driven unblock, rate limits do not trap expired members): [Expiry → unblock → receipt](expiry-unblock-loop.md).
+**Expiry:** a rules actor `id: "brewnix-rules/expiry"` emits `firewall.unblock_ip`; executor removes from alias; write a receipt with `execution.status: "expired"` or `applied` on unblock. Site-local TTL ledger + policy (no IDS-driven unblock, rate limits do not trap expired members): [Expiry → unblock → receipt](expiry-unblock-loop.md). Expiry **inherits** the parent contain [incident](incident-binding-v0.md) only — it never opens a new one.
 
 ### 5. Receipt (`fyber.receipt/v0`)
 

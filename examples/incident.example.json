@@ -1,0 +1,78 @@
+{
+  "open_security": {
+    "schema": "fyber.incident/v0",
+    "incident_id": "550e8400-e29b-41d4-a716-446655440100",
+    "site_id": "net-tn-cottage",
+    "kind": "security",
+    "status": "open",
+    "opened_at": "2026-09-07T14:00:00Z",
+    "opened_by": { "kind": "rule", "id": "brewnix-rules/v0.1" },
+    "severity": "critical",
+    "summary_redacted": "port_scan_burst site=net-tn-cottage ip=203.0.113.50 execute contain",
+    "primary_subjects": [{ "kind": "ip", "value": "203.0.113.50" }],
+    "closed_at": null,
+    "close_reason": null,
+    "flags": { "contain_applied": true, "grant_active": false },
+    "links": {
+      "opening_trace_id": "550e8400-e29b-41d4-a716-446655440000",
+      "opening_receipt_id": "550e8400-e29b-41d4-a716-446655440010"
+    }
+  },
+  "closed_security": {
+    "schema": "fyber.incident/v0",
+    "incident_id": "550e8400-e29b-41d4-a716-446655440100",
+    "site_id": "net-tn-cottage",
+    "kind": "security",
+    "status": "closed",
+    "opened_at": "2026-09-07T14:00:00Z",
+    "opened_by": { "kind": "rule", "id": "brewnix-rules/v0.1" },
+    "severity": "critical",
+    "summary_redacted": "port_scan_burst site=net-tn-cottage ip=203.0.113.50 execute contain",
+    "primary_subjects": [{ "kind": "ip", "value": "203.0.113.50" }],
+    "closed_at": "2026-09-08T14:05:00Z",
+    "close_reason": "auto_quiet",
+    "flags": { "contain_applied": true, "grant_active": false },
+    "links": {
+      "opening_trace_id": "550e8400-e29b-41d4-a716-446655440000",
+      "opening_receipt_id": "550e8400-e29b-41d4-a716-446655440010"
+    }
+  },
+  "open_ops": {
+    "schema": "fyber.incident/v0",
+    "incident_id": "550e8400-e29b-41d4-a716-446655440081",
+    "site_id": "net-tn-cottage",
+    "kind": "ops",
+    "status": "open",
+    "opened_at": "2026-09-07T15:00:00Z",
+    "opened_by": { "kind": "rule", "id": "brewnix-rules/health-v0.1" },
+    "severity": "high",
+    "summary_redacted": "health_suricata_down site=net-tn-cottage node=opnsense-cottage unit=suricata",
+    "primary_subjects": [
+      { "kind": "node_unit", "node": "opnsense-cottage", "unit": "suricata" }
+    ],
+    "closed_at": null,
+    "close_reason": null,
+    "flags": { "contain_applied": false, "grant_active": true },
+    "links": {
+      "opening_trace_id": "550e8400-e29b-41d4-a716-446655440070",
+      "opening_receipt_id": "550e8400-e29b-41d4-a716-446655440071"
+    }
+  },
+  "side_index": {
+    "security": {
+      "incident_id": "550e8400-e29b-41d4-a716-446655440100",
+      "receipt_ids": ["550e8400-e29b-41d4-a716-446655440010"],
+      "ticket_ids": ["550e8400-e29b-41d4-a716-446655440040"],
+      "grant_ids": []
+    },
+    "ops": {
+      "incident_id": "550e8400-e29b-41d4-a716-446655440081",
+      "receipt_ids": ["550e8400-e29b-41d4-a716-446655440071"],
+      "ticket_ids": ["550e8400-e29b-41d4-a716-446655440082"],
+      "grant_ids": [
+        "550e8400-e29b-41d4-a716-446655440080",
+        "550e8400-e29b-41d4-a716-446655440090"
+      ]
+    }
+  }
+}
