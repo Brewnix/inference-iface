@@ -32,6 +32,7 @@ examples/
   incident.example.json
   model-triage.envelope.example.json
   hypermesh-preempt.example.json
+  sociacl-ir-binding.example.json
 docs/
   zero-llm-opnsense-loop.md
   expiry-unblock-loop.md
@@ -42,6 +43,7 @@ docs/
   incident-binding-v0.md
   model-triage-v0.md
   hypermesh-preempt-v0.md
+  sociacl-ir-binding-v0.md
 ```
 
 Canonical home: this repo (`Brewnix/inference-iface`). Downstream consumers (Brewnix policy executor, IR door, Hypermesh host preempt) should pin a release or submodule path rather than forking the schemas.
@@ -71,7 +73,7 @@ Pre-provision OPNsense alias + block rule; mutate alias membership only. No `she
 
 ## Non-goals (v0)
 
-Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes · raw Suricata EVE as model context.
+Hypermesh renter chat schema · SociACL primitive crate (this repo binds only) · SaaS-specific envelopes · raw Suricata EVE as model context.
 
 ## Specs
 
@@ -84,3 +86,4 @@ Hypermesh renter chat schema · SociACL Check grants · SaaS-specific envelopes 
 - [fyber.incident binding v0](docs/incident-binding-v0.md) — locked overlay case (`fyber.incident/v0`); site open/close SoT; never gates contain; side index until schema amend
 - [Model triage v0](docs/model-triage-v0.md) — locked judge-only model path (`actor.kind: model`); `rules_primary` default; never in the executor; no `schemas/` change
 - [Hypermesh preempt v0](docs/hypermesh-preempt-v0.md) — locked Host preempt (`hypermesh.lease_stop` / `hypermesh.sell_pause`); Brewnix proposes, Host executes; tools **never** implied by `rails_profile`; Host inventory may lag; no `schemas/` change
+- [SociACL IR binding v0](docs/sociacl-ir-binding-v0.md) — locked Brewnix binding of SociACL Check + `delegate` / `see` onto `:ir` / `:host`; crate remains SoT; grant ≠ delegate; no `schemas/` change

@@ -1,0 +1,59 @@
+{
+  "schema": "brewnix.sociacl_ir_binding/v0",
+  "locked": "2026-09-07",
+  "source_of_truth": "FyberLabs/SociACL",
+  "objects": [
+    {
+      "id": "site:{site_id}",
+      "role": "standing_owner_possession"
+    },
+    {
+      "id": "site:{site_id}:ir",
+      "role": "ir_keep_operating"
+    },
+    {
+      "id": "site:{site_id}:host",
+      "role": "host_preempt_console_when_exists"
+    }
+  ],
+  "masks": [
+    {
+      "object": "site:{site_id}:ir",
+      "sociacl": ["see", "delegate.read"],
+      "brewnix": "view_redacted_tickets_receipts"
+    },
+    {
+      "object": "site:{site_id}:ir",
+      "sociacl": ["delegate.write"],
+      "brewnix": "annotate_only"
+    },
+    {
+      "object": "site:{site_id}:ir",
+      "sociacl": ["delegate.execute"],
+      "brewnix": "resolve_held_tools_and_mint_non_break_glass_privilege_grants"
+    },
+    {
+      "object": "site:{site_id}:ir",
+      "sociacl": ["delegate.execute"],
+      "brewnix_gate": "principal_is_owner",
+      "enterprise": "two_owner_checks",
+      "brewnix": "approve_break_glass"
+    },
+    {
+      "object": "site:{site_id}:host",
+      "sociacl": ["delegate.execute"],
+      "brewnix": "owner_console_preempt_ack_when_host_exists"
+    }
+  ],
+  "out_of_sociacl_v0": [
+    "machine_site_token",
+    "break_glass_verb",
+    "owner_console_type",
+    "per_incident_acl_object"
+  ],
+  "neq": {
+    "privilege_grant": "fyber.privilege_grant/v0 body stays Brewnix; SociACL authorizes minting",
+    "hop_url_handoff": "never a grant; dest re-Checks",
+    "contain": "no per-event Check; standing owner policy"
+  }
+}

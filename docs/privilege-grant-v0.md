@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Plane contract:** `fyber.privilege_grant/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT) · [Model triage v0](model-triage-v0.md) (`allow_model_execute` only on active `ir_elevated` / `break_glass`; PAIR is an engine, not a tier) · [Hypermesh preempt v0](hypermesh-preempt-v0.md) (`hypermesh.*` only via explicit `tool_allowlist_add` or human; **not** implied by profile)
+**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT) · [Model triage v0](model-triage-v0.md) (`allow_model_execute` only on active `ir_elevated` / `break_glass`; PAIR is an engine, not a tier) · [Hypermesh preempt v0](hypermesh-preempt-v0.md) (`hypermesh.*` only via explicit `tool_allowlist_add` or human; **not** implied by profile) · [SociACL IR binding v0](sociacl-ir-binding-v0.md) (SociACL authorizes minting; grant body stays Brewnix; grant ≠ `delegate`)
 
 Goal: a **bounded, expiring policy elevation** for one `(site_id, incident_id)`. Automations **propose**. A human (or dual-control) **mints**. The site hot-reloads allowlists / budgets / `rails_profile` for that incident only. Executions stay on `fyber.inference_iface/v0` + the typed executor. The LLM never executes.
 
@@ -25,7 +25,7 @@ A grant is **not** a one-shot held-tool approve. That stays on `fyber.auditor.ti
 |----------|-----|
 | JSON Schema under `schemas/` | Separate lock. Implement against this file. |
 | Incident store / join algorithm | Grant **requires** `incident_id`. Open / join / close is [incident-binding-v0](incident-binding-v0.md) — not this file. |
-| SociACL Check grants | Different plane. README non-goal unchanged. |
+| SociACL Check / delegate | Different plane. Binding: [sociacl-ir-binding-v0](sociacl-ir-binding-v0.md). Grant body stays Brewnix; SociACL authorizes minting. |
 | Enterprise compliance pack | Dual-control is a ladder rule, not a SOC2/ISO artifact in this repo. |
 | Expanding `ToolName` casually | Grant tools ⊆ the locked enum and/or a named pack. New tools are a schema amendment. |
 | Per-ask TTL / dual budget meters | Single grant TTL. `budget_tokens` is `max_tokens` only. |

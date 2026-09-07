@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**; tools already in `common.v0`  
 **Site / Host contract:** Hypermesh preempt policy + Host job path (docs-first; **not** a new file under `schemas/`)  
-**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (explicit `tool_allowlist_add`; **never** implied by `rails_profile`) · [Model triage v0](model-triage-v0.md) (LLM judges only; PAIR is an engine) · [fyber.incident binding v0](incident-binding-v0.md) (`lease_stop` execute needs an open `incident_id`) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) (contain stays OPNsense; this spec is not that loop)
+**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (explicit `tool_allowlist_add`; **never** implied by `rails_profile`) · [Model triage v0](model-triage-v0.md) (LLM judges only; PAIR is an engine) · [fyber.incident binding v0](incident-binding-v0.md) (`lease_stop` execute needs an open `incident_id`) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) (contain stays OPNsense; this spec is not that loop) · [SociACL IR binding v0](sociacl-ir-binding-v0.md) (`delegate execute` on `:host` when Host exists; Checkout **not** a SociACL consumer)
 
 Goal: a **typed preempt path** for Hypermesh sell/lease actuators. Brewnix **proposes**. The Host **executes**. Policy decides `propose` vs `execute` with **asymmetric** gates: `sell_pause` blast is smaller than `lease_stop`. The LLM never executes. PAIR is not this path.
 
@@ -23,7 +23,7 @@ Goal: a **typed preempt path** for Hypermesh sell/lease actuators. Brewnix **pro
 |----------|-----|
 | Changing `schemas/` | Tools already exist in `common.v0`. This lock is policy + Host path. |
 | Market discovery / payments | Different plane. README non-goal unchanged. |
-| SociACL Check grants | Different plane. |
+| SociACL Check grants | Different plane. Binding: [sociacl-ir-binding-v0](sociacl-ir-binding-v0.md). Checkout is **not** a SociACL consumer of these grants. Owner-console ack (when Host exists) is `delegate execute` on `:host`. |
 | Implying tools via profile | Axiom 6. Profile is a ceiling, not a Hypermesh grant. |
 | Mass-stop without incident / policy | Rate limit + incident gate + strip extras. |
 | Treating iface args as today's Host RPC | Host does **not** accept `{lease_id, reason_code}` or `{device_id, until}` as local offline calls. See [Host reality](#host-reality-2026-09-07). |
