@@ -3,9 +3,9 @@
 **Status:** working spec (2026-09-06)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`)  
 **Actor:** `kind: "rule"` only — no LLM, no SaaS on the hot path  
-**Companion:** [fyber.incident binding v0](incident-binding-v0.md) (overlay case; **never** gates contain) · [Expiry → unblock → receipt](expiry-unblock-loop.md) · [Health-watch v0.1](health-watch-v0.md)
+**Companion:** [fyber.incident binding v0](incident-binding-v0.md) (overlay case; **never** gates contain) · [Expiry → unblock → receipt](expiry-unblock-loop.md) · [Health-watch v0.1](health-watch-v0.md) · [Model triage v0](model-triage-v0.md) (optional judge; same executor; hot path stays this loop)
 
-Goal: Suricata / OPNsense alerts → contain → receipt, using the same envelopes a later local model can fill without changing the executor.
+Goal: Suricata / OPNsense alerts → contain → receipt, using the same envelopes a later local model can fill without changing the executor ([model-triage v0](model-triage-v0.md)).
 
 ## Components (site box)
 
@@ -137,7 +137,7 @@ Shape reference: `examples/receipt.example.json`.
 
 ## Non-goals
 
-- LLM triage (later: same executor, `actor.kind: "model"`)
+- Replacing this loop with a model on the hot path — LLM triage is [model-triage v0](model-triage-v0.md) (`actor.kind: "model"`); critical auto-contain stays here and still runs with no model process
 - `net.quarantine_host`, Hypermesh `lease_stop`, IR door
 - SaaS on the detect → block path
 - Duplicating schemas into other repos — **consume** this repo as source of truth

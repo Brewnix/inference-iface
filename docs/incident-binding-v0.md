@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris; after pressure-test)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Site contract:** `fyber.incident/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (requires `incident_id`) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot ticket; empty-ask stays there) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [Health-watch v0.1](health-watch-v0.md)
+**Companion:** [fyber.privilege_grant v0](privilege-grant-v0.md) (requires `incident_id`) · [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot ticket; empty-ask stays there) · [Zero-LLM OPNsense detect → block → receipt loop](zero-llm-opnsense-loop.md) · [Health-watch v0.1](health-watch-v0.md) · [Model triage v0](model-triage-v0.md) (model hold/propose opens/joins `security`; policy writes the record, not the LLM)
 
 Goal: a **site-local overlay case** that groups multiple receipt cycles. A `trace_id` is one cycle. An `incident_id` is the multi-cycle case. Contain and `firewall.block_ip` **never** wait on this store. Grants **do** require an `incident_id`. Quiet observe / unscoped receipts do not.
 
@@ -110,7 +110,7 @@ Ops shapes (v0):
 | Event | Action | `kind` |
 |-------|--------|--------|
 | Critical `execute` contain (`firewall.block_ip` applied or attempted) | open or join | `security` |
-| `hold_human` / `propose` + required `notify.operator` (IDS / contain) | open or join | `security` |
+| `hold_human` / `propose` + required `notify.operator` (IDS / contain; rules or [model-triage](model-triage-v0.md) — `opened_by.kind` is still not `model`) | open or join | `security` |
 | Health notify **required** | open or join | `ops` |
 | Grant / `break_glass` | **require** existing or **open** (usually `security`) | existing `kind`, or `security` when opening |
 | Expiry (`brewnix-rules/expiry` / `firewall.unblock_ip`) | **inherit parent incident only**; never open new | parent `kind` |

@@ -3,7 +3,7 @@
 **Status:** working spec — **LOCKED 2026-09-07** (Chris)  
 **Schemas:** pin this repo (`fyber.inference_iface/v0`, `fyber.receipt/v0`, `fyber.feature_bundle/v0`, `fyber.common/v0`) — **no v0 schema break**  
 **Plane contract:** `fyber.privilege_grant/v0` (docs-first; **not** a file under `schemas/`)  
-**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT)
+**Companion:** [fyber.auditor API v0](fyber-auditor-api-v0.md) (one-shot held-tool ticket) · [notify.operator ↔ shared auditor door](notify-operator-audit-door.md) (site half) · [fyber.incident binding v0](incident-binding-v0.md) (required `incident_id`; site open/close SoT) · [Model triage v0](model-triage-v0.md) (`allow_model_execute` only on active `ir_elevated` / `break_glass`; PAIR is an engine, not a tier)
 
 Goal: a **bounded, expiring policy elevation** for one `(site_id, incident_id)`. Automations **propose**. A human (or dual-control) **mints**. The site hot-reloads allowlists / budgets / `rails_profile` for that incident only. Executions stay on `fyber.inference_iface/v0` + the typed executor. The LLM never executes.
 
@@ -187,7 +187,7 @@ propose ──► proposed ──► resolve ──► approved ──► expire
 2. **Optional auditor ticket UX.** `notify.operator` → `POST /v0/tickets` is how a human sees the ask. The ticket is inbox + resolution **intent** ([auditor API](fyber-auditor-api-v0.md)). `ticket_id` on the grant links them. One-shot companion execute still does **not** need a grant.
 3. **Resolve.** Human or dual-control mints (`approved`), refuses (`denied`), or the propose TTL elapses (`timed_out`). Approve may drop asks; must not expand. `break_glass` approve requires ticket `reason_code: break_glass` + notes.
 4. **Hot-reload.** Site policy for that `incident_id` applies the minted profile + asks until `active_until` (`resolved_at` + `ttl_s`).
-5. **Execute.** Unchanged path: envelope proposals → policy → typed actuators → `fyber.receipt/v0`. Elevated execute is allowed only while the grant is `approved` and now < `active_until`. Cite the grant with `receipt.annotate` (or a later additive `grant_id` — **not** a v0 schema field).
+5. **Execute.** Unchanged path: envelope proposals → policy → typed actuators → `fyber.receipt/v0`. Elevated execute is allowed only while the grant is `approved` and now < `active_until`. Cite the grant with `receipt.annotate` (or a later additive `grant_id` — **not** a v0 schema field). Model-originated companion `execute` additionally requires `allow_model_execute: true` ([model-triage v0](model-triage-v0.md)); `strict` / no grant stays propose / hold / notify.
 6. **Expire / revoke.** Clock or human. Policy returns to **strict**. Elevated execute after `active_until` is **denied**.
 
 `parent_grant_id` is how a later propose supersedes. It does not stack TTL or catalogs; the new grant is validated on its own.
